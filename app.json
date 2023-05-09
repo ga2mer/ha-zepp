@@ -1,0 +1,69 @@
+{
+  "configVersion": "v2",
+  "app": {
+    "appId": 391257,
+    "appName": "Home Assistant",
+    "appType": "app",
+    "version": {
+      "code": 1,
+      "name": "1.0.1"
+    },
+    "icon": "icon.png",
+    "vender": "zepp",
+    "description": "Home Assistant companion"
+  },
+  "permissions": [],
+  "runtime": {
+    "apiVersion": {
+      "compatible": "1.0.0",
+      "target": "1.0.1",
+      "minVersion": "1.0.0"
+    }
+  },
+  "debug": true,
+  "targets": {
+    "mi-band7": {
+      "module": {
+        "page": {
+          "pages": [
+            "page/home/index.page"
+          ],
+          "window": {
+            "navigationBarBackgroundColor": "#ffffff",
+            "navigationBarTextStyle": "black",
+            "navigationBarTitleText": "Home Assistant",
+            "backgroundColor": "#eeeeee",
+            "backgroundTextStyle": "light"
+          }
+        },
+        "app-side": {
+          "path": "app-side/index"
+        },
+        "setting": {
+          "path": "setting/index"
+        }
+      },
+      "platforms": [
+        {
+          "name": "amazfit-band7",
+          "deviceSource": 253
+        },
+        {
+          "name": "amazfit-band7-w",
+          "deviceSource": 254
+        },
+        {
+          "name": "mi-band7",
+          "deviceSource": 262
+        }
+      ],
+      "designWidth": 194
+    }
+  },
+  "i18n": {
+    "en-US": {
+      "appName": "Home Assistant"
+    }
+  },
+  "defaultLanguage": "en-US"
+}
