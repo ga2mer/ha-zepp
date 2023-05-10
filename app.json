@@ -26,7 +26,8 @@
       "module": {
         "page": {
           "pages": [
-            "page/home/index.page"
+            "page/home/index.page",
+            "page/light/index.page"
           ],
           "window": {
             "navigationBarBackgroundColor": "#ffffff",

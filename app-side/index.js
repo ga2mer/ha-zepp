@@ -83,7 +83,7 @@ async function getEnabledSensors() {
 AppSideService({
   onInit() {
     console.log("onInit");
-    messageBuilder.listen(() => {});
+    messageBuilder.listen(() => { });
     settings.settingsStorage.addListener(
       "change",
       async ({ key, newValue, oldValue }) => {
@@ -134,6 +134,16 @@ AppSideService({
         });
         ctx.response({ data: { result: [] } });
       }
+      if (payload.method === "LIGHT_SET") {
+        await request(`/api/services/${payload.service}/turn_on`, {
+          method: "POST",
+          body: JSON.stringify({
+            entity_id: payload.entity_id,
+            ...JSON.parse(payload.value | "")
+          }),
+        });
+        ctx.response({ data: { result: [] } });
+      }
       if (payload.method === "GET_SENSORS_LIST") {
         try {
           const enabledSensors = await getEnabledSensors();
@@ -149,5 +159,5 @@ AppSideService({
     console.log("onRun");
   },
 
-  onDestroy() {},
+  onDestroy() { },
 });
