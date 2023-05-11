@@ -76,6 +76,18 @@ Page({
       color: 0xffffff,
       align_h: hmUI.align.CENTER_H,
     });
+
+    if (item.type === "light" | item.type === "media_player") {
+      const iconsize = 24
+      const details_button = this.createWidget(hmUI.widget.IMG, {
+        x: DEVICE_WIDTH - iconsize - 5,
+        y: this.state.y + titleHeight + valueHeight / 2 - iconsize / 2,
+        src: "forward24.png"
+      });
+      details_button.addEventListener(hmUI.event.CLICK_UP, (info) => {
+        hmApp.gotoPage({ file: `page/${item.type}/index.page`, param: JSON.stringify(item) })
+      })
+    }
     this.state.y += totalHeight;
   },
   createSwitchable(item) {
@@ -136,7 +148,7 @@ Page({
     }
     if (typeof item !== 'object' || typeof item.type !== 'string') return;
     if (
-      ["light", "switch", "media_player"].includes(item.type) &&
+      ["light", "switch"].includes(item.type) &&
       item.state !== "unavailable"
     ) {
       return this.createSwitchable(item);

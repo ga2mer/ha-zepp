@@ -67,68 +67,39 @@ Page({
             });
     },
     drawSlider() {
-        const titleHeight = 32;
-        /* brightness slider */
-        this.createWidget(hmUI.widget.TEXT, {
-            x: 10,
-            y: this.state.y,
-            w: DEVICE_WIDTH / 3 * 2,
-            h: titleHeight,
-            text: "Volume",
-            text_size: 17,
-            color: 0xffffff,
-            align_h: hmUI.align.LEFT,
-        });
-
-        const sliderText = this.createWidget(hmUI.widget.TEXT, {
-            x: DEVICE_WIDTH / 3 * 2 + 10,
-            y: this.state.y,
-            w: DEVICE_WIDTH / 3 - 20,
-            h: titleHeight,
-            text: "50%",
-            text_size: 17,
-            color: 0xffffff,
-            align_h: hmUI.align.RIGHT,
-        });
-        this.state.y += titleHeight + 10
-
-
         const sliderWidth = 150
         const sliderRowHeight = 12
         const sliderStartX = DEVICE_WIDTH / 2 - sliderWidth / 2
+        const sliderStartY = DEVICE_HEIGHT - 120
         const sliderRow = this.createWidget(hmUI.widget.FILL_RECT, {
             x: sliderStartX,
-            y: this.state.y,
+            y: sliderStartY,
             w: sliderWidth,
             h: sliderRowHeight,
             radius: sliderRowHeight / 2,
-            color: 0x0884d0
+            color: 0x262626
         })
 
         const sliderPoint = this.createWidget(hmUI.widget.FILL_RECT, {
-            x: DEVICE_WIDTH / 2 - sliderRowHeight,
-            y: this.state.y + sliderRowHeight / 2 - sliderRowHeight,
-            w: sliderRowHeight * 2,
-            h: sliderRowHeight * 2,
+            x: sliderStartX,
+            y: sliderStartY,
+            w: sliderWidth / 2,
+            h: sliderRowHeight,
             radius: sliderRowHeight / 2,
             color: 0xffffff
         })
         this.state.y += sliderRowHeight * 2 + 20
 
         function setSliderPos(floatvalue) {
-            sliderPoint.setProperty(hmUI.prop.MORE, { x: floatvalue * sliderWidth + sliderStartX - sliderRowHeight })
-            sliderText.setProperty(hmUI.prop.MORE, { text: Math.round(floatvalue * 100).toString() + "%" })
+            sliderPoint.setProperty(hmUI.prop.MORE, { w: floatvalue * sliderWidth + sliderStartX })
         }
         function onSliderMove(info, pageState) {
-            let pos = info.x - sliderRowHeight
-            pos = Math.max(pos, sliderStartX - sliderRowHeight)
-            pos = Math.min(pos, sliderStartX + sliderWidth - sliderRowHeight)
+            let width = info.x - sliderStartX
+            width = Math.max(width, 0)
+            width = Math.min(width, sliderStartX + sliderWidth)
 
-            const float_pos = (pos - sliderStartX + sliderRowHeight) / sliderWidth
-            sliderText.setProperty(hmUI.prop.MORE, { text: Math.round(float_pos * 100).toString() + "%" })
-            sliderPoint.setProperty(hmUI.prop.MORE, { x: pos })
-            if (pageState.rendered)
-                messageBuilder.request({ method: "MEDIA_ACTION", entity_id: pageState.item.key, value: `{"volume_level": ${float_pos}}`, service: "volume_set" });
+            const float_pos = (width - sliderStartX) / sliderWidth
+            sliderPoint.setProperty(hmUI.prop.MORE, { w: width })
         }
 
         sliderRow.addEventListener(hmUI.event.CLICK_DOWN, (x) => { onSliderMove(x, this.state) })
@@ -152,9 +123,8 @@ Page({
             y: 0,
             w: DEVICE_WIDTH,
             h: seekButtonsHeight,
-            normal_color: 0xfc6950,
-            press_color: 0xfeb4a8,
-            text: '<=',
+            normal_src: "skip_previous.png",
+            press_src: "skip_previous_pressed.png"
         })
 
         this.state.y = 60 + 10
@@ -163,16 +133,16 @@ Page({
         const valueHeight = 48;
 
         this.createWidget(hmUI.widget.TEXT, {
-            x: 0,
+            x: 10,
             y: this.state.y,
-            w: DEVICE_WIDTH,
+            w: DEVICE_WIDTH - 20,
             h: titleHeight,
             text: this.state.item.title,
             text_size: 19,
             color: 0xffffff,
             align_h: hmUI.align.CENTER_H,
         });
-        this.state.y += titleHeight + 10
+        this.state.y += titleHeight + 20
 
         // this.createWidget(hmUI.widget.SLIDE_SWITCH, {
         //     x: DEVICE_WIDTH / 2 - 76 / 2,
@@ -204,50 +174,78 @@ Page({
         // });
         // this.state.y += valueHeight + 10
 
-        const arc = hmUI.createWidget(hmUI.widget.ARC, {
+        this.createWidget(hmUI.widget.ARC, {
             x: DEVICE_WIDTH / 2 - DEVICE_WIDTH / 4,
             y: this.state.y,
             w: DEVICE_WIDTH / 2,
             h: DEVICE_WIDTH / 2,
             start_angle: 0,
-            end_angle: 90,
-            color: 0xfc6950,
-            line_width: 10
+            end_angle: 360,
+            color: 0x262626,
+            line_width: 7
         })
 
-        this.state.y += DEVICE_WIDTH / 2 + 10
+        const arc = this.createWidget(hmUI.widget.ARC, {
+            x: DEVICE_WIDTH / 2 - DEVICE_WIDTH / 4,
+            y: this.state.y,
+            w: DEVICE_WIDTH / 2,
+            h: DEVICE_WIDTH / 2,
+            start_angle: -90,
+            end_angle: 200,
+            color: 0xffffff,
+            line_width: 7
+        })
 
+        const playIconSize = 48
+        let isPlaying = true
+        const playButton = hmUI.createWidget(hmUI.widget.IMG, {
+            x: DEVICE_WIDTH / 2 - playIconSize / 2,
+            y: this.state.y + DEVICE_WIDTH / 4 - playIconSize / 2,
+                src: isPlaying ? 'pause.png' : 'play.png'
+        })
 
-        if (typeof this.state.item.attributes.volume_level === 'number') {
-            this.drawSlider()
-        }
+        playButton.addEventListener(hmUI.event.CLICK_DOWN, (info) => {
+            isPlaying = !isPlaying
+            playButton.setProperty(hmUI.prop.MORE, {
+                src: isPlaying ? 'pause.png' : 'play.png'
+            })
+        })
+
+        this.state.y += DEVICE_WIDTH / 2 + 30
 
 
         if (this.state.item.attributes.media_title) {
             this.createWidget(hmUI.widget.TEXT, {
                 x: 10,
                 y: this.state.y,
-                w: DEVICE_WIDTH / 3,
-                h: 32,
-                text: "Playing:",
-                text_size: 17,
-                color: 0xffffff,
-                align_h: hmUI.align.LEFT,
-            });
-
-            this.createWidget(hmUI.widget.TEXT, {
-                x: 10 + DEVICE_WIDTH / 3,
-                y: this.state.y,
-                w: DEVICE_WIDTH / 3 * 2 - 20,
-                h: 32,
+                w: DEVICE_WIDTH - 20,
+                h: 38,
                 text: this.state.item.attributes.media_title,
-                text_size: 17,
+                text_size: 21,
                 color: 0xffffff,
-                align_h: hmUI.align.RIGHT,
+                align_h: hmUI.align.CENTER_H,
             });
             this.state.y += 32
         }
 
+
+        if (this.state.item.attributes.media_artist) {
+            this.createWidget(hmUI.widget.TEXT, {
+                x: 10,
+                y: this.state.y,
+                w: DEVICE_WIDTH - 20,
+                h: 34,
+                text: this.state.item.attributes.media_artist,
+                text_size: 19,
+                color: 0xaaaaaa,
+                align_h: hmUI.align.CENTER_H,
+            });
+            this.state.y += 32
+        }
+
+        if (typeof this.state.item.attributes.volume_level === 'number') {
+            this.drawSlider()
+        }
         // if (Object.keys(this.state.item.attributes).length === 0) {
         //     this.createWidget(hmUI.widget.TEXT, {
         //         x: 0,
@@ -266,9 +264,8 @@ Page({
             y: DEVICE_HEIGHT - seekButtonsHeight,
             w: DEVICE_WIDTH,
             h: seekButtonsHeight,
-            normal_color: 0xfc6950,
-            press_color: 0xfeb4a8,
-            text: '=>',
+            normal_src: "skip_next.png",
+            press_src: "skip_next_pressed.png"
         })
 
         this.state.rendered = true;
