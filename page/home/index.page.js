@@ -110,7 +110,7 @@ Page({
       },
     });
 
-    if (item.type === "light") {
+    if (item.type === "light" | item.type === "media_player") {
       const iconsize = 24
       const details_button = this.createWidget(hmUI.widget.IMG, {
         x: DEVICE_WIDTH - iconsize - 5,
@@ -136,7 +136,7 @@ Page({
     }
     if (typeof item !== 'object' || typeof item.type !== 'string') return;
     if (
-      ["light", "switch"].includes(item.type) &&
+      ["light", "switch", "media_player"].includes(item.type) &&
       item.state !== "unavailable"
     ) {
       return this.createSwitchable(item);

@@ -27,7 +27,8 @@
         "page": {
           "pages": [
             "page/home/index.page",
-            "page/light/index.page"
+            "page/light/index.page",
+            "page/media_player/index.page"
           ],
           "window": {
             "navigationBarBackgroundColor": "#ffffff",
