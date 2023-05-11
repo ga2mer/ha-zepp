@@ -109,17 +109,20 @@ Page({
         this.toggleSwitchable(item, checked);
       },
     });
-    const iconsize = 24
-    const details_button = this.createWidget(hmUI.widget.IMG, {
-      x: DEVICE_WIDTH - iconsize - 5,
-      y: this.state.y + titleHeight + valueHeight / 2 - iconsize / 2,
-      src: "forward24.png"
-    });
-    details_button.addEventListener(hmUI.event.CLICK_UP, (info) => {
-      // console.log("defined: ", isHmAppDefined())
-      hmApp.gotoPage({ file: 'page/light/index.page', param: JSON.stringify(item) })
-    })
-    this.state.y += totalHeight;
+
+    if (item.type === "light") {
+      const iconsize = 24
+      const details_button = this.createWidget(hmUI.widget.IMG, {
+        x: DEVICE_WIDTH - iconsize - 5,
+        y: this.state.y + titleHeight + valueHeight / 2 - iconsize / 2,
+        src: "forward24.png"
+      });
+      details_button.addEventListener(hmUI.event.CLICK_UP, (info) => {
+        hmApp.gotoPage({ file: `page/${item.type}/index.page`, param: JSON.stringify(item) })
+      })
+      this.state.y += totalHeight;
+    }
+
   },
   createElement(item) {
     if (item === "end") {

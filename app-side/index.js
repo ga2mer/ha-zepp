@@ -73,11 +73,54 @@ async function getEnabledSensors() {
         key: actualSensor.entity_id,
         title,
         state,
-        type: actualSensor.entity_id.split(".")[0],
+        type: actualSensor.entity_id.split(".")[0]
       };
     })
     .filter((item) => item);
   return enabledSensors;
+}
+
+async function getSensorState(entity_id) {
+  const { body } = await request(`/api/states/${entity_id}`);
+  const sensor = typeof body === "string" ? JSON.parse(body) : body;
+  if (!sensor) return null;
+
+  let title = sensor.entity_id;
+  let state = sensor.state;
+  if (sensor.attributes) {
+    if (typeof sensor.attributes.friendly_name === "string") {
+      title = sensor.attributes.friendly_name;
+    }
+    if (typeof sensor.attributes.unit_of_measurement === "string") {
+      state += sensor.attributes.unit_of_measurement;
+    }
+  }
+
+  actualSensor = {
+    key: sensor.entity_id,
+    title,
+    state,
+    type: sensor.entity_id.split(".")[0],
+    attributes: {}
+  }
+
+  if (actualSensor.type === "light") {
+    if (typeof sensor.attributes.brightness === "number")
+      actualSensor.attributes.brightness = Math.round(sensor.attributes.brightness / 255 * 100)
+
+    if (Array.isArray(sensor.attributes.rgb_color))
+      actualSensor.attributes.rgb_color = sensor.attributes.rgb_color
+
+    if (typeof sensor.attributes.effect === "string")
+      actualSensor.attributes.effect = sensor.attributes.effect
+  }
+  else
+  {
+    console.log("!!!not light")
+  }
+
+  console.log(actualSensor)
+  return actualSensor
 }
 
 AppSideService({
@@ -135,11 +178,12 @@ AppSideService({
         ctx.response({ data: { result: [] } });
       }
       if (payload.method === "LIGHT_SET") {
+        console.log(JSON.stringify(payload))
         await request(`/api/services/${payload.service}/turn_on`, {
           method: "POST",
           body: JSON.stringify({
             entity_id: payload.entity_id,
-            ...JSON.parse(payload.value | "")
+            ...JSON.parse(payload.value)
           }),
         });
         ctx.response({ data: { result: [] } });
@@ -148,6 +192,15 @@ AppSideService({
         try {
           const enabledSensors = await getEnabledSensors();
           ctx.response({ data: { result: enabledSensors } });
+        } catch (e) {
+          ctx.response({ data: { error: e.message } });
+        }
+      }
+
+      if (payload.method === "GET_SENSOR") {
+        try {
+          const sensorState = await getSensorState(payload.entity_id);
+          ctx.response({ data: { result: sensorState } });
         } catch (e) {
           ctx.response({ data: { error: e.message } });
         }
