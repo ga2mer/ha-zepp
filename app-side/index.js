@@ -73,17 +73,82 @@ async function getEnabledSensors() {
         key: actualSensor.entity_id,
         title,
         state,
-        type: actualSensor.entity_id.split(".")[0],
+        type: actualSensor.entity_id.split(".")[0]
       };
     })
     .filter((item) => item);
   return enabledSensors;
 }
 
+async function getSensorState(entity_id) {
+  const { body } = await request(`/api/states/${entity_id}`);
+  const sensor = typeof body === "string" ? JSON.parse(body) : body;
+  if (!sensor) return null;
+
+  let title = sensor.entity_id;
+  let state = sensor.state;
+  if (sensor.attributes) {
+    if (typeof sensor.attributes.friendly_name === "string") {
+      title = sensor.attributes.friendly_name;
+    }
+    if (typeof sensor.attributes.unit_of_measurement === "string") {
+      state += sensor.attributes.unit_of_measurement;
+    }
+  }
+
+  actualSensor = {
+    key: sensor.entity_id,
+    title,
+    state,
+    type: sensor.entity_id.split(".")[0],
+    attributes: {}
+  }
+
+  if (actualSensor.type === "light") {
+    if (typeof sensor.attributes.brightness === "number")
+      actualSensor.attributes.brightness = Math.round(sensor.attributes.brightness / 255 * 100)
+
+    if (Array.isArray(sensor.attributes.rgb_color))
+      actualSensor.attributes.rgb_color = sensor.attributes.rgb_color
+
+    if (typeof sensor.attributes.effect === "string")
+      actualSensor.attributes.effect = sensor.attributes.effect
+
+    actualSensor.attributes.supported_features = sensor.attributes.supported_features
+  }
+
+  if (actualSensor.type === "media_player") {
+
+    if (typeof sensor.attributes.volume_level === "number") {
+      if (typeof sensor.attributes.is_volume_muted === "boolean" && sensor.attributes.is_volume_muted)
+        actualSensor.attributes.volume_level = 0
+
+      actualSensor.attributes.volume_level = sensor.attributes.volume_level
+    }
+
+    if (typeof sensor.attributes.media_position === "number")
+      actualSensor.attributes.media_position = sensor.attributes.media_position
+
+    if (typeof sensor.attributes.media_duration === "number")
+      actualSensor.attributes.media_duration = sensor.attributes.media_duration
+
+    if (typeof sensor.attributes.media_title === "string")
+      actualSensor.attributes.media_title = sensor.attributes.media_title
+
+    if (typeof sensor.attributes.media_artist === "string")
+      actualSensor.attributes.media_artist = sensor.attributes.media_artist
+
+    actualSensor.attributes.supported_features = sensor.attributes.supported_features
+  }
+
+  console.log(actualSensor)
+  return actualSensor
+}
+
 AppSideService({
   onInit() {
     console.log("onInit");
-    messageBuilder.listen(() => {});
+    messageBuilder.listen(() => { });
     settings.settingsStorage.addListener(
       "change",
       async ({ key, newValue, oldValue }) => {
@@ -134,10 +199,39 @@ AppSideService({
         });
         ctx.response({ data: { result: [] } });
       }
+      if (payload.method === "LIGHT_SET") {
+        await request(`/api/services/${payload.service}/turn_on`, {
+          method: "POST",
+          body: JSON.stringify({
+            entity_id: payload.entity_id,
+            ...JSON.parse(payload.value)
+          }),
+        });
+        ctx.response({ data: { result: [] } });
+      }
+      if (payload.method === "MEDIA_ACTION") {
+        await request(`/api/services/media_player/${payload.service}`, {
+          method: "POST",
+          body: JSON.stringify({
+            entity_id: payload.entity_id,
+            ...JSON.parse(payload.value)
+          }),
+        });
+        ctx.response({ data: { result: [] } });
+      }
       if (payload.method === "GET_SENSORS_LIST") {
         try {
           const enabledSensors = await getEnabledSensors();
           ctx.response({ data: { result: enabledSensors } });
+        } catch (e) {
+          ctx.response({ data: { error: e.message } });
+        }
+      }
+
+      if (payload.method === "GET_SENSOR") {
+        try {
+          const sensorState = await getSensorState(payload.entity_id);
+          ctx.response({ data: { result: sensorState } });
         } catch (e) {
           ctx.response({ data: { error: e.message } });
         }
@@ -149,5 +243,5 @@ AppSideService({
     console.log("onRun");
   },
 
-  onDestroy() {},
+  onDestroy() { },
 });

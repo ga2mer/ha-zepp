@@ -48,7 +48,7 @@ AppSettingsPage({
     };
     let sensorsList = [];
     this.state.sensorsList.forEach((item, i) => {
-      if (!item.key.startsWith('light.') && !item.key.startsWith('switch.') && !item.key.startsWith('binary_sensor.') && !item.key.startsWith('sensor.')) {
+      if (!item.key.startsWith('light.') && !item.key.startsWith('switch.') && !item.key.startsWith('binary_sensor.') && !item.key.startsWith('sensor.') && !item.key.startsWith('media_player.')) {
         return;
       }
       sensorsList.push(
@@ -97,7 +97,7 @@ AppSettingsPage({
           },
         })
       ),
-      Text({}, "Only light, switches and (binary) sensors are supported for now:"),
+      Text({}, "Only media players, light, switches and (binary) sensors are supported for now:"),
       sensorsList.length > 0 &&
         View(
           {

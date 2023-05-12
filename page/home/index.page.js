@@ -1,9 +1,11 @@
 // import { getScrollListDataConfig } from '../../utils'
 import { DEVICE_HEIGHT, DEVICE_WIDTH, TOP_BOTTOM_OFFSET } from "./index.style";
 
+import { isHmAppDefined } from "../../shared/js-module"
+
 const { messageBuilder } = getApp()._options.globalData;
 
-const logger = DeviceRuntimeCore.HmLogger.getLogger("helloworld");
+const logger = DeviceRuntimeCore.HmLogger.getLogger("ha-zepp-main");
 
 Page({
   state: {
@@ -52,7 +54,8 @@ Page({
   createSensor(item) {
     const titleHeight = 32;
     const valueHeight = 32;
-    const totalHeight = titleHeight + valueHeight;
+    const sensorsGap = 10;
+    const totalHeight = titleHeight + valueHeight + sensorsGap;
     this.createWidget(hmUI.widget.TEXT, {
       x: 0,
       y: this.state.y,
@@ -65,7 +68,7 @@ Page({
     });
     this.createWidget(hmUI.widget.TEXT, {
       x: 0,
-      y: this.state.y + 32,
+      y: this.state.y + titleHeight,
       w: DEVICE_WIDTH,
       h: valueHeight,
       text: item.state,
@@ -73,12 +76,25 @@ Page({
       color: 0xffffff,
       align_h: hmUI.align.CENTER_H,
     });
+
+    if (item.type === "light" | item.type === "media_player") {
+      const iconsize = 24
+      const details_button = this.createWidget(hmUI.widget.IMG, {
+        x: DEVICE_WIDTH - iconsize - 5,
+        y: this.state.y + titleHeight + valueHeight / 2 - iconsize / 2,
+        src: "forward24.png"
+      });
+      details_button.addEventListener(hmUI.event.CLICK_UP, (info) => {
+        hmApp.gotoPage({ file: `page/${item.type}/index.page`, param: JSON.stringify(item) })
+      })
+    }
     this.state.y += totalHeight;
   },
   createSwitchable(item) {
     const titleHeight = 32;
     const valueHeight = 48;
-    const totalHeight = titleHeight + valueHeight;
+    const sensorsGap = 10;
+    const totalHeight = titleHeight + valueHeight + sensorsGap;
     this.createWidget(hmUI.widget.TEXT, {
       x: 0,
       y: this.state.y,
@@ -91,7 +107,7 @@ Page({
     });
     this.createWidget(hmUI.widget.SLIDE_SWITCH, {
       x: DEVICE_WIDTH / 2 - 76 / 2,
-      y: this.state.y + 32,
+      y: this.state.y + titleHeight,
       w: DEVICE_WIDTH,
       h: valueHeight,
       select_bg: "switch_on.png",
@@ -105,7 +121,20 @@ Page({
         this.toggleSwitchable(item, checked);
       },
     });
-    this.state.y += totalHeight + 4;
+
+    if (item.type === "light" | item.type === "media_player") {
+      const iconsize = 24
+      const details_button = this.createWidget(hmUI.widget.IMG, {
+        x: DEVICE_WIDTH - iconsize - 5,
+        y: this.state.y + titleHeight + valueHeight / 2 - iconsize / 2,
+        src: "forward24.png"
+      });
+      details_button.addEventListener(hmUI.event.CLICK_UP, (info) => {
+        hmApp.gotoPage({ file: `page/${item.type}/index.page`, param: JSON.stringify(item) })
+      })
+      this.state.y += totalHeight;
+    }
+
   },
   createElement(item) {
     if (item === "end") {
