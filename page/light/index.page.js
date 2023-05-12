@@ -1,6 +1,6 @@
 import { DEVICE_HEIGHT, DEVICE_WIDTH, TOP_BOTTOM_OFFSET } from "../home/index.style";
 const { messageBuilder } = getApp()._options.globalData;
-const logger = DeviceRuntimeCore.HmLogger.getLogger("helloworld-1");
+const logger = DeviceRuntimeCore.HmLogger.getLogger("ha-zepp-light");
 
 Page({
     state: {
@@ -250,27 +250,12 @@ Page({
             this.state.y += 32
         }
 
-        // if (Object.keys(this.state.item.attributes).length === 0) {
-        //     this.createWidget(hmUI.widget.TEXT, {
-        //         x: 0,
-        //         y: this.state.y,
-        //         w: DEVICE_WIDTH,
-        //         h: DEVICE_HEIGHT - this.state.y,
-        //         text: "Nothing here because the light is off",
-        //         text_size: 18,
-        //         color: 0xffffff,
-        //         align_h: hmUI.align.CENTER_H,
-        //         align_v: hmUI.align.CENTER_V
-        //     });
-        // }
-
         this.state.rendered = true;
     },
     onInit(param) {
         logger.log('onInit')
         logger.log("param", param)
         this.state.item = JSON.parse(param)
-        logger.debug("Page for", this.state.item.key)
         messageBuilder.on("call", ({ payload: buf }) => { })
         this.drawWait()
         this.getSensorInfo()

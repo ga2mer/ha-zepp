@@ -5,7 +5,7 @@ import { isHmAppDefined } from "../../shared/js-module"
 
 const { messageBuilder } = getApp()._options.globalData;
 
-const logger = DeviceRuntimeCore.HmLogger.getLogger("helloworld");
+const logger = DeviceRuntimeCore.HmLogger.getLogger("ha-zepp-main");
 
 Page({
   state: {

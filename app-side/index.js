@@ -113,11 +113,18 @@ async function getSensorState(entity_id) {
 
     if (typeof sensor.attributes.effect === "string")
       actualSensor.attributes.effect = sensor.attributes.effect
+
+    actualSensor.attributes.supported_features = sensor.attributes.supported_features
   }
 
   if (actualSensor.type === "media_player") {
-    if (typeof sensor.attributes.volume_level === "number")
+
+    if (typeof sensor.attributes.volume_level === "number") {
+      if (typeof sensor.attributes.is_volume_muted === "boolean" && sensor.attributes.is_volume_muted)
+        actualSensor.attributes.volume_level = 0
+
       actualSensor.attributes.volume_level = sensor.attributes.volume_level
+    }
 
     if (typeof sensor.attributes.media_position === "number")
       actualSensor.attributes.media_position = sensor.attributes.media_position
@@ -131,6 +138,7 @@ async function getSensorState(entity_id) {
     if (typeof sensor.attributes.media_artist === "string")
       actualSensor.attributes.media_artist = sensor.attributes.media_artist
 
+    actualSensor.attributes.supported_features = sensor.attributes.supported_features
   }
 
   console.log(actualSensor)
@@ -192,7 +200,6 @@ AppSideService({
         ctx.response({ data: { result: [] } });
       }
       if (payload.method === "LIGHT_SET") {
-        console.log(JSON.stringify(payload))
         await request(`/api/services/${payload.service}/turn_on`, {
           method: "POST",
           body: JSON.stringify({
@@ -203,7 +210,6 @@ AppSideService({
         ctx.response({ data: { result: [] } });
       }
       if (payload.method === "MEDIA_ACTION") {
-        console.log(JSON.stringify(payload))
         await request(`/api/services/media_player/${payload.service}`, {
           method: "POST",
           body: JSON.stringify({
