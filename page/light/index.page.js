@@ -1,4 +1,5 @@
 import { DEVICE_HEIGHT, DEVICE_WIDTH, TOP_BOTTOM_OFFSET } from "../home/index.style";
+import { createSlider } from "../../controls/slider";
 const { messageBuilder } = getApp()._options.globalData;
 const logger = DeviceRuntimeCore.HmLogger.getLogger("ha-zepp-light");
 
@@ -9,6 +10,9 @@ Page({
         widgets: [],
         rendered: false,
         reloadTimer: null
+    },
+    addWidget(widget) {
+        this.state.widgets.push(widget);
     },
     createWidget(...args) {
         const widget = hmUI.createWidget(...args);
@@ -92,49 +96,76 @@ Page({
         });
         this.state.y += titleHeight + 10
 
+        const brightnessSlider = createSlider(
+            {
+                h: 12,
+                w: 150,
+                x: DEVICE_WIDTH / 2 - 150 / 2,
+                y: this.state.y,
+                backColor: 0x0884d0,
+                frontColor: 0xffffff,
+                hasPoint: true,
+                ctx: this,
+                onSliderMove: (ctx, floatvalue) => {
+                    floatvalue = Math.round(floatvalue * 100)
+                    sliderText.setProperty(hmUI.prop.MORE, { text: floatvalue.toString() + "%" })
+                    if (ctx.state.rendered)
+                        messageBuilder.request(
+                            {
+                                method: "LIGHT_SET",
+                                entity_id: ctx.state.item.key,
+                                value: `{"brightness_pct": ${floatvalue}}`,
+                                service: ctx.state.item.type
+                            });
+                }
+            })
+        this.state.y += 12 * 2 + 20
 
-        const sliderWidth = 150
-        const sliderRowHeight = 12
-        const sliderStartX = DEVICE_WIDTH / 2 - sliderWidth / 2
-        const sliderRow = this.createWidget(hmUI.widget.FILL_RECT, {
-            x: sliderStartX,
-            y: this.state.y,
-            w: sliderWidth,
-            h: sliderRowHeight,
-            radius: sliderRowHeight / 2,
-            color: 0x0884d0
-        })
+        brightnessSlider.setPosition(this.state.item.attributes.brightness / 100)
+        this.addWidget(brightnessSlider.components)
 
-        const sliderPoint = this.createWidget(hmUI.widget.FILL_RECT, {
-            x: DEVICE_WIDTH / 2 - sliderRowHeight,
-            y: this.state.y + sliderRowHeight / 2 - sliderRowHeight,
-            w: sliderRowHeight * 2,
-            h: sliderRowHeight * 2,
-            radius: sliderRowHeight / 2,
-            color: 0xffffff
-        })
-        this.state.y += sliderRowHeight * 2 + 20
+        // const sliderWidth = 150
+        // const sliderRowHeight = 12
+        // const sliderStartX = DEVICE_WIDTH / 2 - sliderWidth / 2
+        // const sliderRow = this.createWidget(hmUI.widget.FILL_RECT, {
+        //     x: sliderStartX,
+        //     y: this.state.y,
+        //     w: sliderWidth,
+        //     h: sliderRowHeight,
+        //     radius: sliderRowHeight / 2,
+        //     color: 0x0884d0
+        // })
 
-        function setSliderPos(percent) {
-            sliderPoint.setProperty(hmUI.prop.MORE, { x: percent / 100 * sliderWidth + sliderStartX - sliderRowHeight })
-            sliderText.setProperty(hmUI.prop.MORE, { text: percent.toString() + "%" })
-        }
-        function onSliderMove(info, pageState) {
-            let pos = info.x - sliderRowHeight
-            pos = Math.max(pos, sliderStartX - sliderRowHeight)
-            pos = Math.min(pos, sliderStartX + sliderWidth - sliderRowHeight)
+        // const sliderPoint = this.createWidget(hmUI.widget.FILL_RECT, {
+        //     x: DEVICE_WIDTH / 2 - sliderRowHeight,
+        //     y: this.state.y + sliderRowHeight / 2 - sliderRowHeight,
+        //     w: sliderRowHeight * 2,
+        //     h: sliderRowHeight * 2,
+        //     radius: sliderRowHeight / 2,
+        //     color: 0xffffff
+        // })
+        // this.state.y += sliderRowHeight * 2 + 20
 
-            const pos_pct = Math.round((pos - sliderStartX + sliderRowHeight) / sliderWidth * 100)
-            sliderText.setProperty(hmUI.prop.MORE, { text: pos_pct.toString() + "%" })
-            sliderPoint.setProperty(hmUI.prop.MORE, { x: pos })
-            if (pageState.rendered)
-                messageBuilder.request({ method: "LIGHT_SET", entity_id: pageState.item.key, value: `{"brightness_pct": ${pos_pct}}`, service: pageState.item.type });
-        }
+        // function setSliderPos(percent) {
+        //     sliderPoint.setProperty(hmUI.prop.MORE, { x: percent / 100 * sliderWidth + sliderStartX - sliderRowHeight })
+        //     sliderText.setProperty(hmUI.prop.MORE, { text: percent.toString() + "%" })
+        // }
+        // function onSliderMove(info, pageState) {
+        //     let pos = info.x - sliderRowHeight
+        //     pos = Math.max(pos, sliderStartX - sliderRowHeight)
+        //     pos = Math.min(pos, sliderStartX + sliderWidth - sliderRowHeight)
 
-        sliderRow.addEventListener(hmUI.event.CLICK_DOWN, (x) => { onSliderMove(x, this.state) })
-        sliderPoint.addEventListener(hmUI.event.CLICK_DOWN, (x) => { onSliderMove(x, this.state) })
+        //     const pos_pct = Math.round((pos - sliderStartX + sliderRowHeight) / sliderWidth * 100)
+        //     sliderText.setProperty(hmUI.prop.MORE, { text: pos_pct.toString() + "%" })
+        //     sliderPoint.setProperty(hmUI.prop.MORE, { x: pos })
+        //     if (pageState.rendered)
+        //         messageBuilder.request({ method: "LIGHT_SET", entity_id: pageState.item.key, value: `{"brightness_pct": ${pos_pct}}`, service: pageState.item.type });
+        // }
+        // sliderPoint.setEnable(false)
+        // sliderRow.addEventListener(hmUI.event.CLICK_DOWN, (x) => { onSliderMove(x, this.state) })
+        // // sliderPoint.addEventListener(hmUI.event.CLICK_DOWN, (x) => { onSliderMove(x, this.state) })
 
-        setSliderPos(this.state.item.attributes.brightness)
+        // setSliderPos(this.state.item.attributes.brightness)
         /* brightness slider */
     },
     drawColorWheel() {
