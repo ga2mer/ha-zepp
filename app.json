@@ -28,7 +28,9 @@
           "pages": [
             "page/home/index.page",
             "page/light/index.page",
-            "page/media_player/index.page"
+            "page/light/effectPicker.page",
+            "page/media_player/index.page",
+            "page/test_page/index.page"
           ],
           "window": {
             "navigationBarBackgroundColor": "#ffffff",

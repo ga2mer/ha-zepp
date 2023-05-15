@@ -1,8 +1,9 @@
 import { DEVICE_HEIGHT, DEVICE_WIDTH, TOP_BOTTOM_OFFSET } from "../home/index.style";
+import { createSlider } from "../../controls/slider";
 const { messageBuilder } = getApp()._options.globalData;
 const logger = DeviceRuntimeCore.HmLogger.getLogger("ha-zepp-mediaplayer");
 
-const sliderWidth = 150;
+// const sliderWidth = 150;
 
 Page({
     state: {
@@ -12,7 +13,8 @@ Page({
         rendered: false,
         reloadTimer: null,
         arcUpdateTimer: null,
-        sliderPoint: null,
+        // sliderPoint: null,
+        volumeSlider: null,
         titleText: null,
         artistText: null,
         positionArc: null,
@@ -23,6 +25,9 @@ Page({
         const widget = hmUI.createWidget(...args);
         this.state.widgets.push(widget);
         return widget;
+    },
+    addWidgets(widgets) {
+        this.state.widgets.push(...widgets);
     },
     destroyTimers() {
         if (this.state.arcUpdateTimer) {
@@ -36,8 +41,6 @@ Page({
         }
     },
     clearWidgets() {
-
-
         this.state.widgets.forEach((widget, index) => {
             hmUI.deleteWidget(widget);
         });
@@ -142,49 +145,8 @@ Page({
             this.state.isPlaying = action === "play"
         }
     },
-    setSliderPos(floatvalue) {
-        this.state.sliderPoint.setProperty(hmUI.prop.MORE, { w: floatvalue * sliderWidth + DEVICE_WIDTH / 2 - sliderWidth / 2 });
-    },
     setArcPosition(floatvalue) {
         this.state.positionArc.setProperty(hmUI.prop.MORE, { end_angle: Math.min(270, Math.round(floatvalue * 360) - 90) });
-    },
-    drawSlider() {
-        const sliderRowHeight = 12
-        const sliderStartX = DEVICE_WIDTH / 2 - sliderWidth / 2
-        const sliderStartY = DEVICE_HEIGHT - 120
-        const sliderRow = this.createWidget(hmUI.widget.FILL_RECT, {
-            x: sliderStartX,
-            y: sliderStartY,
-            w: sliderWidth,
-            h: sliderRowHeight,
-            radius: sliderRowHeight / 2,
-            color: 0x262626
-        })
-
-        this.state.sliderPoint = this.createWidget(hmUI.widget.FILL_RECT, {
-            x: sliderStartX,
-            y: sliderStartY,
-            w: sliderWidth / 2,
-            h: sliderRowHeight,
-            radius: sliderRowHeight / 2,
-            color: 0xffffff
-        })
-        this.state.y += sliderRowHeight * 2 + 20
-
-        function onSliderMove(info, pageState) {
-            let width = info.x - sliderStartX
-            width = Math.max(width, 0)
-            width = Math.min(width, sliderStartX + sliderWidth)
-
-            const float_pos = (width / sliderWidth).toFixed(2)
-            pageState.sliderPoint.setProperty(hmUI.prop.MORE, { w: width })
-
-            if (pageState.rendered)
-                messageBuilder.request({ method: "MEDIA_ACTION", entity_id: pageState.item.key, value: `{"volume_level": ${float_pos}}`, service: "volume_set" });
-        }
-
-        sliderRow.addEventListener(hmUI.event.CLICK_UP, (x) => { onSliderMove(x, this.state) })
-        this.state.sliderPoint.addEventListener(hmUI.event.CLICK_UP, (x) => { onSliderMove(x, this.state) })
     },
     updateElementsData() {
         this.state.isPlaying = this.state.item.state === "playing"
@@ -207,7 +169,7 @@ Page({
             this.state.artistText.setProperty(hmUI.prop.TEXT, this.state.item.attributes.media_artist);
 
         if (typeof this.state.item.attributes.volume_level === 'number')
-            this.setSliderPos(this.state.item.attributes.volume_level);
+            this.volumeSlider.setPosition(this.state.item.attributes.volume_level);
 
     },
     drawElements() {
@@ -281,7 +243,7 @@ Page({
         }
 
         const playIconSize = 48
-        this.state.playButton = hmUI.createWidget(hmUI.widget.IMG, {
+        this.state.playButton = this.createWidget(hmUI.widget.IMG, {
             x: DEVICE_WIDTH / 2 - playIconSize / 2,
             y: this.state.y + DEVICE_WIDTH / 4 - playIconSize / 2,
             src: 'play.png'
@@ -332,7 +294,31 @@ Page({
         }
 
         if (typeof this.state.item.attributes.volume_level === 'number') {
-            this.drawSlider()
+            this.state.volumeSlider = createSlider(
+                {
+                    x: 10,
+                    y: DEVICE_HEIGHT - 130,
+                    h: 24,
+                    w: DEVICE_WIDTH - 20,
+                    backColor: 0x262626,
+                    frontColor: 0xffffff,
+                    buttons: { img_down: "volume_down.png", img_up: "volume_up.png", change_amt: 0.1 },
+                    hasPoint: false,
+                    ctx: this,
+                    onSliderMove: (ctx, floatvalue, isUserInput) => {
+                        if (ctx.state.rendered && isUserInput)
+                            messageBuilder.request(
+                                {
+                                    method: "MEDIA_ACTION",
+                                    entity_id: ctx.state.item.key,
+                                    value: `{"volume_level": ${floatvalue}}`,
+                                    service: "volume_set"
+                                });
+                    }
+                })
+            this.state.y += 12 * 2 + 20
+            this.addWidgets(this.state.volumeSlider.components)
+
         }
 
         if (this.state.item.attributes.supported_features & 32) { //NEXT_TRACK  https://github.com/home-assistant/core/blob/e9705364a80fff9c18e2e24b0c0dceff0a71df6e/homeassistant/components/media_player/const.py#L179
