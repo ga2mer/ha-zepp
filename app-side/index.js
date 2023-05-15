@@ -114,6 +114,9 @@ async function getSensorState(entity_id) {
     if (typeof sensor.attributes.effect === "string")
       actualSensor.attributes.effect = sensor.attributes.effect
 
+    if (Array.isArray(sensor.attributes.effect_list))
+      actualSensor.attributes.effect_list = sensor.attributes.effect_list
+
     actualSensor.attributes.supported_features = sensor.attributes.supported_features
   }
 

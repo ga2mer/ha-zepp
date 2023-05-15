@@ -26,8 +26,8 @@ Page({
         this.state.widgets.push(widget);
         return widget;
     },
-    addWidget(widget) {
-        this.state.widgets.push(widget);
+    addWidgets(widgets) {
+        this.state.widgets.push(...widgets);
     },
     destroyTimers() {
         if (this.state.arcUpdateTimer) {
@@ -296,16 +296,17 @@ Page({
         if (typeof this.state.item.attributes.volume_level === 'number') {
             this.state.volumeSlider = createSlider(
                 {
-                    h: 12,
-                    w: 150,
-                    x: DEVICE_WIDTH / 2 - 150 / 2,
-                    y: DEVICE_HEIGHT - 120,
+                    x: 10,
+                    y: DEVICE_HEIGHT - 130,
+                    h: 24,
+                    w: DEVICE_WIDTH - 20,
                     backColor: 0x262626,
                     frontColor: 0xffffff,
+                    buttons: { img_down: "volume_down.png", img_up: "volume_up.png", change_amt: 0.1 },
                     hasPoint: false,
                     ctx: this,
-                    onSliderMove: (ctx, floatvalue) => {
-                        if (ctx.state.rendered)
+                    onSliderMove: (ctx, floatvalue, isUserInput) => {
+                        if (ctx.state.rendered && isUserInput)
                             messageBuilder.request(
                                 {
                                     method: "MEDIA_ACTION",
@@ -316,7 +317,7 @@ Page({
                     }
                 })
             this.state.y += 12 * 2 + 20
-            this.addWidget(this.state.volumeSlider.components)
+            this.addWidgets(this.state.volumeSlider.components)
 
         }
 

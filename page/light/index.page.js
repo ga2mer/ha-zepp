@@ -11,8 +11,8 @@ Page({
         rendered: false,
         reloadTimer: null
     },
-    addWidget(widget) {
-        this.state.widgets.push(widget);
+    addWidgets(widgets) {
+        this.state.widgets.push(...widgets);
     },
     createWidget(...args) {
         const widget = hmUI.createWidget(...args);
@@ -78,7 +78,7 @@ Page({
             y: this.state.y,
             w: DEVICE_WIDTH / 3 * 2,
             h: titleHeight,
-            text: "Brightness",
+            text: "Brightness:",
             text_size: 17,
             color: 0xffffff,
             align_h: hmUI.align.LEFT,
@@ -98,18 +98,22 @@ Page({
 
         const brightnessSlider = createSlider(
             {
-                h: 12,
-                w: 150,
-                x: DEVICE_WIDTH / 2 - 150 / 2,
+                x: 10,
                 y: this.state.y,
-                backColor: 0x0884d0,
+                h: 24,
+                w: DEVICE_WIDTH - 20,
+                // backColor: 0x0884d0,
+                // frontColor: 0xffffff,
+                // hasPoint: true,
+                backColor: 0x262626,
                 frontColor: 0xffffff,
-                hasPoint: true,
+                hasPoint: false,
+                buttons: { img_down: "brightness_down.png", img_up: "brightness_up.png", change_amt: 0.1 },
                 ctx: this,
-                onSliderMove: (ctx, floatvalue) => {
+                onSliderMove: (ctx, floatvalue, isUserInput) => {
                     floatvalue = Math.round(floatvalue * 100)
                     sliderText.setProperty(hmUI.prop.MORE, { text: floatvalue.toString() + "%" })
-                    if (ctx.state.rendered)
+                    if (ctx.state.rendered && isUserInput)
                         messageBuilder.request(
                             {
                                 method: "LIGHT_SET",
@@ -119,54 +123,11 @@ Page({
                             });
                 }
             })
-        this.state.y += 12 * 2 + 20
+        this.state.y += 24 + 20
 
         brightnessSlider.setPosition(this.state.item.attributes.brightness / 100)
-        this.addWidget(brightnessSlider.components)
 
-        // const sliderWidth = 150
-        // const sliderRowHeight = 12
-        // const sliderStartX = DEVICE_WIDTH / 2 - sliderWidth / 2
-        // const sliderRow = this.createWidget(hmUI.widget.FILL_RECT, {
-        //     x: sliderStartX,
-        //     y: this.state.y,
-        //     w: sliderWidth,
-        //     h: sliderRowHeight,
-        //     radius: sliderRowHeight / 2,
-        //     color: 0x0884d0
-        // })
-
-        // const sliderPoint = this.createWidget(hmUI.widget.FILL_RECT, {
-        //     x: DEVICE_WIDTH / 2 - sliderRowHeight,
-        //     y: this.state.y + sliderRowHeight / 2 - sliderRowHeight,
-        //     w: sliderRowHeight * 2,
-        //     h: sliderRowHeight * 2,
-        //     radius: sliderRowHeight / 2,
-        //     color: 0xffffff
-        // })
-        // this.state.y += sliderRowHeight * 2 + 20
-
-        // function setSliderPos(percent) {
-        //     sliderPoint.setProperty(hmUI.prop.MORE, { x: percent / 100 * sliderWidth + sliderStartX - sliderRowHeight })
-        //     sliderText.setProperty(hmUI.prop.MORE, { text: percent.toString() + "%" })
-        // }
-        // function onSliderMove(info, pageState) {
-        //     let pos = info.x - sliderRowHeight
-        //     pos = Math.max(pos, sliderStartX - sliderRowHeight)
-        //     pos = Math.min(pos, sliderStartX + sliderWidth - sliderRowHeight)
-
-        //     const pos_pct = Math.round((pos - sliderStartX + sliderRowHeight) / sliderWidth * 100)
-        //     sliderText.setProperty(hmUI.prop.MORE, { text: pos_pct.toString() + "%" })
-        //     sliderPoint.setProperty(hmUI.prop.MORE, { x: pos })
-        //     if (pageState.rendered)
-        //         messageBuilder.request({ method: "LIGHT_SET", entity_id: pageState.item.key, value: `{"brightness_pct": ${pos_pct}}`, service: pageState.item.type });
-        // }
-        // sliderPoint.setEnable(false)
-        // sliderRow.addEventListener(hmUI.event.CLICK_DOWN, (x) => { onSliderMove(x, this.state) })
-        // // sliderPoint.addEventListener(hmUI.event.CLICK_DOWN, (x) => { onSliderMove(x, this.state) })
-
-        // setSliderPos(this.state.item.attributes.brightness)
-        /* brightness slider */
+        this.addWidgets(brightnessSlider.components)
     },
     drawColorWheel() {
         const titleHeight = 32;
@@ -232,7 +193,7 @@ Page({
                 if (!this.state.rendered) return;
                 messageBuilder.request({ method: "TOGGLE_SWITCH", entity_id: this.state.item.key, value: checked, service: this.state.item.type });
                 this.state.reloadTimer = timer.createTimer(
-                    1000,
+                    2000,
                     10000,
                     function (page) {
                         timer.stopTimer(page.state.reloadTimer)
@@ -268,7 +229,7 @@ Page({
                 align_h: hmUI.align.LEFT,
             });
 
-            this.createWidget(hmUI.widget.TEXT, {
+            const effectText = this.createWidget(hmUI.widget.TEXT, {
                 x: 10 + DEVICE_WIDTH / 3,
                 y: this.state.y,
                 w: DEVICE_WIDTH / 3 * 2 - 20,
@@ -278,7 +239,10 @@ Page({
                 color: 0xffffff,
                 align_h: hmUI.align.RIGHT,
             });
-            this.state.y += 32
+
+            effectText.addEventListener(hmUI.event.CLICK_DOWN, (info) => {
+                hmApp.gotoPage({ file: `page/light/effectPicker.page`, param: JSON.stringify(this.state.item) })
+            })
         }
 
         this.state.rendered = true;

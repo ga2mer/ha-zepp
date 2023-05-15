@@ -138,12 +138,15 @@ Page({
   },
   createElement(item) {
     if (item === "end") {
-      return this.createWidget(hmUI.widget.TEXT, {
+      return this.createWidget(hmUI.widget.BUTTON, {
         x: 0,
         y: this.state.y,
         w: DEVICE_WIDTH,
         h: TOP_BOTTOM_OFFSET,
-        text: "",
+        text: "   ",
+        click_func: () => {
+          hmApp.gotoPage({ file: 'page/test_page/index.page' })
+        }
       });
     }
     if (typeof item !== 'object' || typeof item.type !== 'string') return;
