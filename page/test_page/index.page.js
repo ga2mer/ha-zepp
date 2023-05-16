@@ -1,5 +1,6 @@
 import { DEVICE_HEIGHT, DEVICE_WIDTH, TOP_BOTTOM_OFFSET } from "../home/index.style";
 import { createSlider } from "../../controls/slider";
+import { nativeSlider } from "../../controls/nativeSlider";
 const { messageBuilder } = getApp()._options.globalData;
 const logger = DeviceRuntimeCore.HmLogger.getLogger("ha-zepp-testpage");
 
@@ -150,7 +151,15 @@ Page({
             h: TOP_BOTTOM_OFFSET,
             text: "Native slider",
             click_func: () => {
-                hmApp.gotoPage({ file: 'page/test_page/nativeSlider.page' })
+                const nativeslider = nativeSlider({
+                    ctx: this,
+                    onSliderMove: (ctx, floatpos, isUserInput) => {
+                        console.log("nativeslider input", floatpos)
+                    },
+                    backColor: 0x303030,
+                    frontColor: 0xf0f0f0
+                })
+                nativeslider.setPosition(0.23)
             }
         });
 
@@ -158,6 +167,7 @@ Page({
     },
     onInit() {
         logger.log('onInit')
+        hmUI.setLayerScrolling(false);
         this.drawElements()
     },
     build() { },

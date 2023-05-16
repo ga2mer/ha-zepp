@@ -30,8 +30,7 @@
             "page/light/index.page",
             "page/light/effectPicker.page",
             "page/media_player/index.page",
-            "page/test_page/index.page",
-            "page/test_page/nativeSlider.page"
+            "page/test_page/index.page"
           ],
           "window": {
             "navigationBarBackgroundColor": "#ffffff",
