@@ -133,7 +133,7 @@ Page({
                 backColor: 0x262626,
                 frontColor: 0xffffff,
                 hasPoint: false,
-                buttons: {img_down: "brightness_down.png", img_up: "brightness_up.png", change_amt: 0.1},
+                buttons: { img_down: "brightness_down.png", img_up: "brightness_up.png", change_amt: 0.1 },
                 ctx: this,
                 onSliderMove: (ctx, floatvalue, isUserInput) => {
                     if (ctx.state.rendered && isUserInput)
@@ -142,6 +142,17 @@ Page({
             })
         this.state.y += 12 * 2 + 20
         this.addWidget(buttonSlider.components)
+
+        this.createWidget(hmUI.widget.BUTTON, {
+            x: 0,
+            y: this.state.y,
+            w: DEVICE_WIDTH,
+            h: TOP_BOTTOM_OFFSET,
+            text: "Native slider",
+            click_func: () => {
+                hmApp.gotoPage({ file: 'page/test_page/nativeSlider.page' })
+            }
+        });
 
         this.state.rendered = true;
     },
