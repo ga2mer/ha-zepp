@@ -144,6 +144,20 @@ Page({
         this.state.y += 12 * 2 + 20
         this.addWidget(buttonSlider.components)
 
+        const nativeslider = nativeSlider({
+            ctx: this,
+            onSliderMove: (ctx, floatpos, isUserInput) => {
+                console.log("nativeslider input", floatpos)
+            },
+            stateImages: ["volume_min_1.png", "volume_min_2.png", "volume_mid.png", "volume_mid.png", "volume_max.png", "volume_max.png"],
+            button: {
+                onButtonToggle: (ctx, newValue) => { console.log("nativeSlider button", newValue) },
+                image: "volume_off.png"
+            },
+            backColor: 0x303030,
+            frontColor: 0xf0f0f0
+        })
+
         this.createWidget(hmUI.widget.BUTTON, {
             x: 0,
             y: this.state.y,
@@ -151,14 +165,7 @@ Page({
             h: TOP_BOTTOM_OFFSET,
             text: "Native slider",
             click_func: () => {
-                const nativeslider = nativeSlider({
-                    ctx: this,
-                    onSliderMove: (ctx, floatpos, isUserInput) => {
-                        console.log("nativeslider input", floatpos)
-                    },
-                    backColor: 0x303030,
-                    frontColor: 0xf0f0f0
-                })
+                nativeslider.show()
                 nativeslider.setPosition(0.23)
             }
         });

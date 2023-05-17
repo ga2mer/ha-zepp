@@ -44,7 +44,7 @@ Page({
     });
     this.state.widgets = [];
     this.state.y = TOP_BOTTOM_OFFSET; // start from this y to skip rounded border
-    // hmUI.redraw();
+    hmUI.redraw();
   },
   createWidget(...args) {
     const widget = hmUI.createWidget(...args);

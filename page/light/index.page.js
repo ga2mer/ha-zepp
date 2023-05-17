@@ -26,7 +26,7 @@ Page({
         this.state.widgets = [];
         this.state.rendered = false;
         this.state.y = TOP_BOTTOM_OFFSET; // start from this y to skip rounded border
-        // hmUI.redraw();
+        hmUI.redraw();
     },
     drawTextMessage(message, button) {
         this.clearWidgets();
