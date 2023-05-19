@@ -8,6 +8,7 @@
  *                          buttons: object, //{img_down: "minus_image.png", img_up: "plus_image.png", change_amt: 0.5}
  *                          ctx: object,
  *                          onSliderMove: function(ctx,floatpos,isUserInput),
+ *                          onSliderClick: function(ctx), //if this set, slider will act as button
  *                          frontColor: number,
  *                          backColor: number,
  *                      }
@@ -88,7 +89,7 @@ export const createSlider = (args) => {
                 hmUI.prop.MORE,
                 { w: value }
             );
-        args.onSliderMove(args.ctx, sliderValue, true)
+        if (args.onSliderMove) args.onSliderMove(args.ctx, sliderValue, true);
     };
 
     const setPosition = (floatvalue, isUserInput = false) => {
@@ -101,7 +102,7 @@ export const createSlider = (args) => {
             sliderPoint.setProperty(
                 hmUI.prop.MORE,
                 { w: floatvalue * args.w });
-        args.onSliderMove(args.ctx, floatvalue, isUserInput)
+        if (args.onSliderMove) args.onSliderMove(args.ctx, floatvalue, isUserInput);
     };
 
     const getPosition = () => {
@@ -110,18 +111,33 @@ export const createSlider = (args) => {
 
     let components = [sliderRow, sliderPoint]
 
-    if (args.buttons) {
-        components.push(downButton, upButton)
-        downButton.addEventListener(hmUI.event.CLICK_UP, (info) => { setPosition(Math.max(0, sliderValue - args.buttons.change_amt), true) })
-        upButton.addEventListener(hmUI.event.CLICK_UP, (info) => { setPosition(Math.min(1, sliderValue + args.buttons.change_amt), true) })
-    }
-    else {
-        sliderRow.addEventListener(hmUI.event.CLICK_UP, onSliderMove)
+    if (args.onSliderClick) {
+        if (args.buttons) {
+            components.push(downButton, upButton)
+            downButton.addEventListener(hmUI.event.CLICK_UP, () => { args.onSliderClick(args.ctx) })
+            upButton.addEventListener(hmUI.event.CLICK_UP, () => { args.onSliderClick(args.ctx) })
+        }
+        sliderRow.addEventListener(hmUI.event.CLICK_UP, () => { args.onSliderClick(args.ctx) })
 
         if (args.hasPoint)
-            sliderPoint.addEventListener(hmUI.event.CLICK_UP, onSliderMove);
+            sliderPoint.addEventListener(hmUI.event.CLICK_UP, () => { args.onSliderClick(args.ctx) });
         else
             sliderPoint.setEnable(false);
+    }
+    else {
+        if (args.buttons) {
+            components.push(downButton, upButton)
+            downButton.addEventListener(hmUI.event.CLICK_UP, (info) => { setPosition(Math.max(0, sliderValue - args.buttons.change_amt), true) })
+            upButton.addEventListener(hmUI.event.CLICK_UP, (info) => { setPosition(Math.min(1, sliderValue + args.buttons.change_amt), true) })
+        }
+        else {
+            sliderRow.addEventListener(hmUI.event.CLICK_UP, onSliderMove)
+
+            if (args.hasPoint)
+                sliderPoint.addEventListener(hmUI.event.CLICK_UP, onSliderMove);
+            else
+                sliderPoint.setEnable(false);
+        }
     }
 
     return { setPosition, getPosition, components }

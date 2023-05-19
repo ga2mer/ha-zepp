@@ -1,5 +1,6 @@
 import { DEVICE_HEIGHT, DEVICE_WIDTH, TOP_BOTTOM_OFFSET } from "../home/index.style";
-import { createSlider } from "../../controls/slider";
+import { nativeSlider } from "../../controls/nativeSlider";
+import { createProgressBar } from "../../controls/progressBar";
 const { messageBuilder } = getApp()._options.globalData;
 const logger = DeviceRuntimeCore.HmLogger.getLogger("ha-zepp-mediaplayer");
 
@@ -13,12 +14,12 @@ Page({
         rendered: false,
         reloadTimer: null,
         arcUpdateTimer: null,
-        // sliderPoint: null,
-        volumeSlider: null,
+        volumeBar: null,
         titleText: null,
         artistText: null,
         positionArc: null,
         playButton: null,
+        nativeslider: null,
         isPlaying: false
     },
     createWidget(...args) {
@@ -41,13 +42,14 @@ Page({
         }
     },
     clearWidgets() {
+        this.destroyTimers()
         this.state.widgets.forEach((widget, index) => {
             hmUI.deleteWidget(widget);
         });
         this.state.widgets = [];
         this.state.rendered = false;
         this.state.y = TOP_BOTTOM_OFFSET; // start from this y to skip rounded border
-        // hmUI.redraw();
+        hmUI.redraw();
     },
     drawTextMessage(message, button) {
         this.clearWidgets();
@@ -151,11 +153,9 @@ Page({
     updateElementsData() {
         this.state.isPlaying = this.state.item.state === "playing"
 
-        if (this.state.isPlaying) {
-            this.state.playButton.setProperty(hmUI.prop.MORE, {
-                src: (this.state.isPlaying ? "pause" : "play") + ".png"
-            })
-        }
+        this.state.playButton.setProperty(hmUI.prop.MORE, {
+            src: (this.state.isPlaying ? "pause" : "play") + ".png"
+        })
 
         if (this.state.positionArc) {
             this.setArcPosition(this.state.item.attributes.media_position / this.state.item.attributes.media_duration);
@@ -168,8 +168,13 @@ Page({
         if (this.state.artistText)
             this.state.artistText.setProperty(hmUI.prop.TEXT, this.state.item.attributes.media_artist);
 
-        if (typeof this.state.item.attributes.volume_level === 'number')
-            this.volumeSlider.setPosition(this.state.item.attributes.volume_level);
+        if (typeof this.state.item.attributes.is_volume_muted === "boolean")
+            this.state.nativeSlider.setButtonToggle(this.state.item.attributes.is_volume_muted);
+
+        if (typeof this.state.item.attributes.volume_level === "number") {
+            this.state.volumeBar.setPosition(this.state.item.attributes.volume_level);
+            this.state.nativeSlider.setPosition(this.state.item.attributes.volume_level);
+        }
 
     },
     drawElements() {
@@ -215,8 +220,8 @@ Page({
         this.state.y += titleHeight + 20
 
 
-        if (typeof this.state.item.attributes.media_duration === "number" &&
-            typeof this.state.item.attributes.media_position === "number") {
+        if (this.state.item.attributes.media_duration &&
+            this.state.item.attributes.media_position) {
 
             this.createWidget(hmUI.widget.ARC, {
                 x: DEVICE_WIDTH / 2 - DEVICE_WIDTH / 4,
@@ -293,8 +298,49 @@ Page({
             this.state.y += 32
         }
 
-        if (typeof this.state.item.attributes.volume_level === 'number') {
-            this.state.volumeSlider = createSlider(
+        if (typeof this.state.item.attributes.volume_level === "number") {
+            let nativeSliderButton = null;
+
+            if (typeof this.state.item.attributes.is_volume_muted === "boolean") {
+                nativeSliderButton = {
+                    image: "volume_off.png",
+                    onButtonToggle: (ctx, newValue) => {
+                        logger.log("nativeSlider button", newValue);
+
+                        messageBuilder.request(
+                            {
+                                method: "MEDIA_ACTION",
+                                entity_id: ctx.state.item.key,
+                                value: `{"is_volume_muted": ${newValue}}`,
+                                service: "volume_mute"
+                            });
+                    }
+                }
+            }
+
+            this.state.nativeSlider = nativeSlider({
+                ctx: this,
+                onSliderMove: (ctx, floatpos, isUserInput) => {
+                    logger.log("nativeslider input", floatpos)
+
+                    if (ctx.state.rendered && isUserInput) {
+                        messageBuilder.request(
+                            {
+                                method: "MEDIA_ACTION",
+                                entity_id: ctx.state.item.key,
+                                value: `{"volume_level": ${floatpos}}`,
+                                service: "volume_set"
+                            });
+                        ctx.state.volumeBar.setPosition(floatpos);
+                    }
+                },
+                stateImages: ["volume_min_1.png", "volume_min_2.png", "volume_mid.png", "volume_mid.png", "volume_max.png", "volume_max.png"],
+                button: nativeSliderButton,
+                backColor: 0x303030,
+                frontColor: 0xf0f0f0
+            })
+
+            this.state.volumeBar = createProgressBar(
                 {
                     x: 10,
                     y: DEVICE_HEIGHT - 130,
@@ -302,22 +348,17 @@ Page({
                     w: DEVICE_WIDTH - 20,
                     backColor: 0x262626,
                     frontColor: 0xffffff,
-                    buttons: { img_down: "volume_down.png", img_up: "volume_up.png", change_amt: 0.1 },
-                    hasPoint: false,
+                    src: "volume_up.png",
                     ctx: this,
-                    onSliderMove: (ctx, floatvalue, isUserInput) => {
-                        if (ctx.state.rendered && isUserInput)
-                            messageBuilder.request(
-                                {
-                                    method: "MEDIA_ACTION",
-                                    entity_id: ctx.state.item.key,
-                                    value: `{"volume_level": ${floatvalue}}`,
-                                    service: "volume_set"
-                                });
-                    }
+                    onClick: (ctx) => {
+                        if (!ctx.state.rendered) return
+                        ctx.state.nativeSlider.show()
+                        ctx.state.nativeSlider.setPosition(ctx.state.item.attributes.volume_level)
+                        ctx.state.nativeSlider.setButtonToggle(ctx.state.item.attributes.is_volume_muted)
+                    },
                 })
             this.state.y += 12 * 2 + 20
-            this.addWidgets(this.state.volumeSlider.components)
+            this.addWidgets(this.state.volumeBar.components)
 
         }
 
@@ -342,12 +383,12 @@ Page({
     },
     onInit(param) {
         logger.log('onInit')
+
         logger.log("param", param)
         this.state.item = JSON.parse(param)
-        messageBuilder.on("call", ({ payload: buf }) => { })
         this.drawWait()
         this.getSensorInfo()
     },
-    build() { },
+    build() { hmUI.setLayerScrolling(false); },
     onDestroy() { this.destroyTimers(); }
 });

@@ -122,12 +122,11 @@ async function getSensorState(entity_id) {
 
   if (actualSensor.type === "media_player") {
 
-    if (typeof sensor.attributes.volume_level === "number") {
-      if (typeof sensor.attributes.is_volume_muted === "boolean" && sensor.attributes.is_volume_muted)
-        actualSensor.attributes.volume_level = 0
-
+    if (typeof sensor.attributes.volume_level === "number")
       actualSensor.attributes.volume_level = sensor.attributes.volume_level
-    }
+
+    if (typeof sensor.attributes.is_volume_muted === "boolean")
+      actualSensor.attributes.is_volume_muted = sensor.attributes.is_volume_muted
 
     if (typeof sensor.attributes.media_position === "number")
       actualSensor.attributes.media_position = sensor.attributes.media_position

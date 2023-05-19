@@ -1,9 +1,7 @@
 // import { getScrollListDataConfig } from '../../utils'
 import { DEVICE_HEIGHT, DEVICE_WIDTH, TOP_BOTTOM_OFFSET } from "./index.style";
 
-import { isHmAppDefined } from "../../shared/js-module"
-
-const { messageBuilder } = getApp()._options.globalData;
+const { messageBuilder, appId } = getApp()._options.globalData;
 
 const logger = DeviceRuntimeCore.HmLogger.getLogger("ha-zepp-main");
 
@@ -44,7 +42,7 @@ Page({
     });
     this.state.widgets = [];
     this.state.y = TOP_BOTTOM_OFFSET; // start from this y to skip rounded border
-    // hmUI.redraw();
+    hmUI.redraw();
   },
   createWidget(...args) {
     const widget = hmUI.createWidget(...args);
@@ -222,6 +220,13 @@ Page({
     }
     return this.drawTextMessage(text);
   },
+  onAppMessage({ payload: buf }) {
+    const data = messageBuilder.buf2Json(buf);
+    if (data.action === "listUpdate") {
+      this.state.dataList = data.value;
+      this.createAndUpdateList();
+    }
+  },
   onInit() {
     if (hmBle.connectStatus()) {
       this.drawWait();
@@ -230,16 +235,11 @@ Page({
       this.drawNoBLEConnect();
     }
     logger.debug("page onInit invoked");
-    messageBuilder.on("call", ({ payload: buf }) => {
-      const data = messageBuilder.buf2Json(buf);
-      if (data.action === "listUpdate") {
-        this.state.dataList = data.value;
-        this.createAndUpdateList();
-      }
-    });
+    messageBuilder.on("call", this.onAppMessage);
   },
 
   onDestroy() {
+    messageBuilder.off("call", this.onAppMessage);
     logger.debug("page onDestroy invoked");
   },
 });

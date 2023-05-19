@@ -1,6 +1,6 @@
 import { DEVICE_HEIGHT, DEVICE_WIDTH, TOP_BOTTOM_OFFSET } from "../home/index.style";
 import { createSlider } from "../../controls/slider";
-const { messageBuilder } = getApp()._options.globalData;
+import { nativeSlider } from "../../controls/nativeSlider";
 const logger = DeviceRuntimeCore.HmLogger.getLogger("ha-zepp-testpage");
 
 Page({
@@ -133,7 +133,7 @@ Page({
                 backColor: 0x262626,
                 frontColor: 0xffffff,
                 hasPoint: false,
-                buttons: {img_down: "brightness_down.png", img_up: "brightness_up.png", change_amt: 0.1},
+                buttons: { img_down: "brightness_down.png", img_up: "brightness_up.png", change_amt: 0.1 },
                 ctx: this,
                 onSliderMove: (ctx, floatvalue, isUserInput) => {
                     if (ctx.state.rendered && isUserInput)
@@ -143,10 +143,38 @@ Page({
         this.state.y += 12 * 2 + 20
         this.addWidget(buttonSlider.components)
 
+        const nativeslider = nativeSlider({
+            ctx: this,
+            onSliderMove: (ctx, floatpos, isUserInput) => {
+                console.log("nativeslider input", floatpos)
+            },
+            stateImages: ["volume_min_1.png", "volume_min_2.png", "volume_mid.png", "volume_mid.png", "volume_max.png", "volume_max.png"],
+            button: {
+                onButtonToggle: (ctx, newValue) => { console.log("nativeSlider button", newValue) },
+                image: "volume_off.png"
+            },
+            backColor: 0x303030,
+            frontColor: 0xf0f0f0
+        })
+
+        this.createWidget(hmUI.widget.BUTTON, {
+            x: 0,
+            y: this.state.y,
+            w: DEVICE_WIDTH,
+            h: TOP_BOTTOM_OFFSET,
+            text: "Native slider",
+            click_func: () => {
+                nativeslider.show()
+                nativeslider.setPosition(0.23)
+            }
+        });
+
         this.state.rendered = true;
     },
     onInit() {
         logger.log('onInit')
+
+        hmUI.setLayerScrolling(false);
         this.drawElements()
     },
     build() { },
