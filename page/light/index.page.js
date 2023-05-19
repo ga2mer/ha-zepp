@@ -1,5 +1,6 @@
 import { DEVICE_HEIGHT, DEVICE_WIDTH, TOP_BOTTOM_OFFSET } from "../home/index.style";
-import { createSlider } from "../../controls/slider";
+import { createProgressBar } from "../../controls/progressBar";
+import { nativeSlider } from "../../controls/nativeSlider";
 const { messageBuilder } = getApp()._options.globalData;
 const logger = DeviceRuntimeCore.HmLogger.getLogger("ha-zepp-light");
 
@@ -8,6 +9,9 @@ Page({
         y: TOP_BOTTOM_OFFSET,
         item: null,
         widgets: [],
+        nativeSlider: null,
+        brightnessBar: null,
+        sliderText: null,
         rendered: false,
         reloadTimer: null
     },
@@ -84,7 +88,7 @@ Page({
             align_h: hmUI.align.LEFT,
         });
 
-        const sliderText = this.createWidget(hmUI.widget.TEXT, {
+        this.state.sliderText = this.createWidget(hmUI.widget.TEXT, {
             x: DEVICE_WIDTH / 3 * 2 + 10,
             y: this.state.y,
             w: DEVICE_WIDTH / 3 - 20,
@@ -96,38 +100,50 @@ Page({
         });
         this.state.y += titleHeight + 10
 
-        const brightnessSlider = createSlider(
+        this.state.nativeSlider = nativeSlider({
+            ctx: this,
+            onSliderMove: (ctx, floatpos, isUserInput) => {
+                logger.log("nativeslider input", floatpos)
+
+                value_pct = Math.round(floatpos * 100)
+                ctx.state.sliderText.setProperty(hmUI.prop.MORE, { text: value_pct.toString() + "%" })
+                ctx.state.brightnessBar.setPosition(floatpos);
+                if (ctx.state.rendered && isUserInput)
+                    messageBuilder.request(
+                        {
+                            method: "LIGHT_SET",
+                            entity_id: ctx.state.item.key,
+                            value: `{"brightness_pct": ${value_pct}}`,
+                            service: ctx.state.item.type
+                        });
+            },
+            stateImages: ["brightness_min_1.png", "brightness_min_2.png", "brightness_mid.png", "brightness_mid.png", "brightness_max.png", "brightness_max.png"],
+            backColor: 0x303030,
+            frontColor: 0xf0f0f0
+        })
+
+        this.state.brightnessBar = createProgressBar(
             {
                 x: 10,
                 y: this.state.y,
                 h: 24,
                 w: DEVICE_WIDTH - 20,
-                // backColor: 0x0884d0,
-                // frontColor: 0xffffff,
-                // hasPoint: true,
                 backColor: 0x262626,
                 frontColor: 0xffffff,
-                hasPoint: false,
-                buttons: { img_down: "brightness_down.png", img_up: "brightness_up.png", change_amt: 0.1 },
+                src: "brightness_up.png",
                 ctx: this,
-                onSliderMove: (ctx, floatvalue, isUserInput) => {
-                    floatvalue = Math.round(floatvalue * 100)
-                    sliderText.setProperty(hmUI.prop.MORE, { text: floatvalue.toString() + "%" })
-                    if (ctx.state.rendered && isUserInput)
-                        messageBuilder.request(
-                            {
-                                method: "LIGHT_SET",
-                                entity_id: ctx.state.item.key,
-                                value: `{"brightness_pct": ${floatvalue}}`,
-                                service: ctx.state.item.type
-                            });
+                onClick: (ctx) => {
+                    if (!ctx.state.rendered) return
+
+                    ctx.state.nativeSlider.show()
+                    ctx.state.nativeSlider.setPosition(this.state.item.attributes.brightness / 100)
                 }
             })
         this.state.y += 24 + 20
 
-        brightnessSlider.setPosition(this.state.item.attributes.brightness / 100)
+        this.state.brightnessBar.setPosition(this.state.item.attributes.brightness / 100)
 
-        this.addWidgets(brightnessSlider.components)
+        this.addWidgets(this.state.brightnessBar.components)
     },
     drawColorWheel() {
         const titleHeight = 32;
@@ -245,18 +261,34 @@ Page({
             })
         }
 
+        if (Object.keys(this.state.item.attributes).length === 0) {
+            this.createWidget(hmUI.widget.TEXT, {
+                x: 0,
+                y: this.state.y,
+                w: DEVICE_WIDTH,
+                h: DEVICE_HEIGHT - this.state.y,
+                text: "Nothing here because the light is off",
+                text_size: 18,
+                color: 0xffffff,
+                align_h: hmUI.align.CENTER_H,
+                align_v: hmUI.align.CENTER_V
+            });
+        }
+
         this.state.rendered = true;
+    },
+    onDataSave() {
+
     },
     onInit(param) {
         logger.log('onInit')
-        logger.log("param", param)
+
         this.state.item = JSON.parse(param)
-        messageBuilder.on("call", ({ payload: buf }) => { })
         this.drawWait()
         this.getSensorInfo()
     },
     build() {
-        hmUI.setLayerScrolling(true);
+        hmUI.setLayerScrolling(false);
     },
     onDestroy() { }
 });

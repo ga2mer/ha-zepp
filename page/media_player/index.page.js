@@ -1,6 +1,6 @@
 import { DEVICE_HEIGHT, DEVICE_WIDTH, TOP_BOTTOM_OFFSET } from "../home/index.style";
-import { createSlider } from "../../controls/slider";
 import { nativeSlider } from "../../controls/nativeSlider";
+import { createProgressBar } from "../../controls/progressBar";
 const { messageBuilder } = getApp()._options.globalData;
 const logger = DeviceRuntimeCore.HmLogger.getLogger("ha-zepp-mediaplayer");
 
@@ -14,7 +14,7 @@ Page({
         rendered: false,
         reloadTimer: null,
         arcUpdateTimer: null,
-        volumeSlider: null,
+        volumeBar: null,
         titleText: null,
         artistText: null,
         positionArc: null,
@@ -172,7 +172,7 @@ Page({
             this.state.nativeSlider.setButtonToggle(this.state.item.attributes.is_volume_muted);
 
         if (typeof this.state.item.attributes.volume_level === "number") {
-            this.state.volumeSlider.setPosition(this.state.item.attributes.volume_level);
+            this.state.volumeBar.setPosition(this.state.item.attributes.volume_level);
             this.state.nativeSlider.setPosition(this.state.item.attributes.volume_level);
         }
 
@@ -331,7 +331,7 @@ Page({
                                 value: `{"volume_level": ${floatpos}}`,
                                 service: "volume_set"
                             });
-                        ctx.state.volumeSlider.setPosition(floatpos);
+                        ctx.state.volumeBar.setPosition(floatpos);
                     }
                 },
                 stateImages: ["volume_min_1.png", "volume_min_2.png", "volume_mid.png", "volume_mid.png", "volume_max.png", "volume_max.png"],
@@ -340,7 +340,7 @@ Page({
                 frontColor: 0xf0f0f0
             })
 
-            this.state.volumeSlider = createSlider(
+            this.state.volumeBar = createProgressBar(
                 {
                     x: 10,
                     y: DEVICE_HEIGHT - 130,
@@ -348,28 +348,17 @@ Page({
                     w: DEVICE_WIDTH - 20,
                     backColor: 0x262626,
                     frontColor: 0xffffff,
-                    buttons: { img_down: "volume_down.png", img_up: "volume_up.png", change_amt: 0.1 },
-                    hasPoint: false,
+                    src: "volume_up.png",
                     ctx: this,
-                    onSliderClick: (ctx) => {
+                    onClick: (ctx) => {
                         if (!ctx.state.rendered) return
                         ctx.state.nativeSlider.show()
                         ctx.state.nativeSlider.setPosition(ctx.state.item.attributes.volume_level)
                         ctx.state.nativeSlider.setButtonToggle(ctx.state.item.attributes.is_volume_muted)
                     },
-                    // onSliderMove: (ctx, floatvalue, isUserInput) => {
-                    //     if (ctx.state.rendered && isUserInput)
-                    //         messageBuilder.request(
-                    //             {
-                    //                 method: "MEDIA_ACTION",
-                    //                 entity_id: ctx.state.item.key,
-                    //                 value: `{"volume_level": ${floatvalue}}`,
-                    //                 service: "volume_set"
-                    //             });
-                    // }
                 })
             this.state.y += 12 * 2 + 20
-            this.addWidgets(this.state.volumeSlider.components)
+            this.addWidgets(this.state.volumeBar.components)
 
         }
 
@@ -394,9 +383,9 @@ Page({
     },
     onInit(param) {
         logger.log('onInit')
+
         logger.log("param", param)
         this.state.item = JSON.parse(param)
-        messageBuilder.on("call", ({ payload: buf }) => { })
         this.drawWait()
         this.getSensorInfo()
     },

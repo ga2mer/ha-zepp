@@ -1,7 +1,6 @@
 import { DEVICE_HEIGHT, DEVICE_WIDTH, TOP_BOTTOM_OFFSET } from "../home/index.style";
 import { createSlider } from "../../controls/slider";
 import { nativeSlider } from "../../controls/nativeSlider";
-const { messageBuilder } = getApp()._options.globalData;
 const logger = DeviceRuntimeCore.HmLogger.getLogger("ha-zepp-testpage");
 
 Page({
@@ -174,6 +173,7 @@ Page({
     },
     onInit() {
         logger.log('onInit')
+
         hmUI.setLayerScrolling(false);
         this.drawElements()
     },
