@@ -1,55 +1,23 @@
-import { DEVICE_HEIGHT, DEVICE_WIDTH, TOP_BOTTOM_OFFSET } from "../home/index.style";
+import AppPage from '../Page';
+
+import { DEVICE_WIDTH } from "../home/index.style";
+import { createSlider } from "../../controls/slider";
 const { messageBuilder } = getApp()._options.globalData;
 const logger = DeviceRuntimeCore.HmLogger.getLogger("ha-zepp-light");
 
-Page({
-    state: {
-        y: TOP_BOTTOM_OFFSET,
-        item: null,
-        widgets: [],
-        rendered: false,
-        reloadTimer: null
-    },
-    createWidget(...args) {
-        const widget = hmUI.createWidget(...args);
-        this.state.widgets.push(widget);
-        return widget;
-    },
-    clearWidgets() {
-        this.state.widgets.forEach((widget, index) => {
-            hmUI.deleteWidget(widget);
-        });
-        this.state.widgets = [];
+class Index extends AppPage {
+    constructor(...props) {
+        super(...props);
+        this.state.item = null;
+        this.state.reloadTimer = null;
         this.state.rendered = false;
-        this.state.y = TOP_BOTTOM_OFFSET; // start from this y to skip rounded border
-        // hmUI.redraw();
-    },
-    drawTextMessage(message, button) {
-        this.clearWidgets();
-        this.createWidget(hmUI.widget.TEXT, {
-            x: 0,
-            y: 0,
-            w: DEVICE_WIDTH,
-            h: DEVICE_HEIGHT,
-            text: message,
-            text_size: 18,
-            color: 0xffffff,
-            align_h: hmUI.align.CENTER_H,
-            align_v: hmUI.align.CENTER_V,
-        });
-        return;
-    },
+    }
+    addWidgets(widgets) {
+        this.app.widgets.push(...widgets);
+    }
     drawWait() {
         return this.drawTextMessage(`Loading...\n${this.state.item.title}`);
-    },
-    drawError(message) {
-        let text = "An error occurred";
-        if (typeof message === 'string') {
-            text += ':\n';
-            text += message;
-        }
-        return this.drawTextMessage(text);
-    },
+    }
     getSensorInfo() {
         messageBuilder
             .request({ method: "GET_SENSOR", entity_id: this.state.item.key })
@@ -65,7 +33,7 @@ Page({
                 this.drawError();
                 console.log(res);
             });
-    },
+    }
     drawSlider() {
         const titleHeight = 32;
         /* brightness slider */
@@ -74,7 +42,7 @@ Page({
             y: this.state.y,
             w: DEVICE_WIDTH / 3 * 2,
             h: titleHeight,
-            text: "Brightness",
+            text: "Brightness:",
             text_size: 17,
             color: 0xffffff,
             align_h: hmUI.align.LEFT,
@@ -92,51 +60,39 @@ Page({
         });
         this.state.y += titleHeight + 10
 
+        const brightnessSlider = createSlider(
+            {
+                x: 10,
+                y: this.state.y,
+                h: 24,
+                w: DEVICE_WIDTH - 20,
+                // backColor: 0x0884d0,
+                // frontColor: 0xffffff,
+                // hasPoint: true,
+                backColor: 0x262626,
+                frontColor: 0xffffff,
+                hasPoint: false,
+                buttons: { img_down: "brightness_down.png", img_up: "brightness_up.png", change_amt: 0.1 },
+                ctx: this,
+                onSliderMove: (ctx, floatvalue, isUserInput) => {
+                    floatvalue = Math.round(floatvalue * 100)
+                    sliderText.setProperty(hmUI.prop.MORE, { text: floatvalue.toString() + "%" })
+                    if (ctx.state.rendered && isUserInput)
+                        messageBuilder.request(
+                            {
+                                method: "LIGHT_SET",
+                                entity_id: ctx.state.item.key,
+                                value: `{"brightness_pct": ${floatvalue}}`,
+                                service: ctx.state.item.type
+                            });
+                }
+            })
+        this.state.y += 24 + 20
 
-        const sliderWidth = 150
-        const sliderRowHeight = 12
-        const sliderStartX = DEVICE_WIDTH / 2 - sliderWidth / 2
-        const sliderRow = this.createWidget(hmUI.widget.FILL_RECT, {
-            x: sliderStartX,
-            y: this.state.y,
-            w: sliderWidth,
-            h: sliderRowHeight,
-            radius: sliderRowHeight / 2,
-            color: 0x0884d0
-        })
+        brightnessSlider.setPosition(this.state.item.attributes.brightness / 100)
 
-        const sliderPoint = this.createWidget(hmUI.widget.FILL_RECT, {
-            x: DEVICE_WIDTH / 2 - sliderRowHeight,
-            y: this.state.y + sliderRowHeight / 2 - sliderRowHeight,
-            w: sliderRowHeight * 2,
-            h: sliderRowHeight * 2,
-            radius: sliderRowHeight / 2,
-            color: 0xffffff
-        })
-        this.state.y += sliderRowHeight * 2 + 20
-
-        function setSliderPos(percent) {
-            sliderPoint.setProperty(hmUI.prop.MORE, { x: percent / 100 * sliderWidth + sliderStartX - sliderRowHeight })
-            sliderText.setProperty(hmUI.prop.MORE, { text: percent.toString() + "%" })
-        }
-        function onSliderMove(info, pageState) {
-            let pos = info.x - sliderRowHeight
-            pos = Math.max(pos, sliderStartX - sliderRowHeight)
-            pos = Math.min(pos, sliderStartX + sliderWidth - sliderRowHeight)
-
-            const pos_pct = Math.round((pos - sliderStartX + sliderRowHeight) / sliderWidth * 100)
-            sliderText.setProperty(hmUI.prop.MORE, { text: pos_pct.toString() + "%" })
-            sliderPoint.setProperty(hmUI.prop.MORE, { x: pos })
-            if (pageState.rendered)
-                messageBuilder.request({ method: "LIGHT_SET", entity_id: pageState.item.key, value: `{"brightness_pct": ${pos_pct}}`, service: pageState.item.type });
-        }
-
-        sliderRow.addEventListener(hmUI.event.CLICK_DOWN, (x) => { onSliderMove(x, this.state) })
-        sliderPoint.addEventListener(hmUI.event.CLICK_DOWN, (x) => { onSliderMove(x, this.state) })
-
-        setSliderPos(this.state.item.attributes.brightness)
-        /* brightness slider */
-    },
+        this.addWidgets(brightnessSlider.components)
+    }
     drawColorWheel() {
         const titleHeight = 32;
         const rectSize = 24
@@ -161,7 +117,7 @@ Page({
         })
 
         this.state.y += titleHeight + 10
-    },
+    }
     drawElements() {
         this.state.rendered = false;
         this.clearWidgets()
@@ -201,7 +157,7 @@ Page({
                 if (!this.state.rendered) return;
                 messageBuilder.request({ method: "TOGGLE_SWITCH", entity_id: this.state.item.key, value: checked, service: this.state.item.type });
                 this.state.reloadTimer = timer.createTimer(
-                    1000,
+                    2000,
                     10000,
                     function (page) {
                         timer.stopTimer(page.state.reloadTimer)
@@ -237,7 +193,7 @@ Page({
                 align_h: hmUI.align.LEFT,
             });
 
-            this.createWidget(hmUI.widget.TEXT, {
+            const effectText = this.createWidget(hmUI.widget.TEXT, {
                 x: 10 + DEVICE_WIDTH / 3,
                 y: this.state.y,
                 w: DEVICE_WIDTH / 3 * 2 - 20,
@@ -247,21 +203,28 @@ Page({
                 color: 0xffffff,
                 align_h: hmUI.align.RIGHT,
             });
-            this.state.y += 32
+
+            effectText.addEventListener(hmUI.event.CLICK_DOWN, (info) => {
+                // hmApp.gotoPage({ file: `page/light/effectPicker.page`, param: JSON.stringify(this.state.item) })
+                this.router.go('light/effect_picker', this.state.item);
+            })
         }
 
         this.state.rendered = true;
-    },
+    }
     onInit(param) {
         logger.log('onInit')
         logger.log("param", param)
-        this.state.item = JSON.parse(param)
-        messageBuilder.on("call", ({ payload: buf }) => { })
+        this.state.item = param;
         this.drawWait()
         this.getSensorInfo()
-    },
-    build() {
+    }
+    onRender() {
         hmUI.setLayerScrolling(true);
-    },
-    onDestroy() { }
-});
+    }
+    onDestroy() {
+        timer.stopTimer(this.state.reloadTimer)
+     }
+}
+
+export default Index;

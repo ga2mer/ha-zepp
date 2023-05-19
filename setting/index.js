@@ -75,14 +75,16 @@ AppSettingsPage({
         label: 'Local HA instance address:',
         settingsKey: "localHAIP",
         subStyle: textInputStyle,
+        placeholder: 'http://192.168.0.13:8123',
       }),
       TextInput({
         label: "External HA instance address:",
         settingsKey: "externalHAIP",
         subStyle: textInputStyle,
+        placeholder: 'https://your-ha-instance.com',
       }),
       TextInput({
-        label: "Long access token:",
+        label: "Long-lived access token:",
         settingsKey: "HAToken",
         subStyle: textInputStyle,
       }),

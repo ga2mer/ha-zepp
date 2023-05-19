@@ -1,18 +1,18 @@
 export function assets(type) {
-  return (path) => type + '/' + path
+  return (path) => type + "/" + path;
 }
 
 const TYPE = {
-  'sensor': 1,
-  'binary_sensor': 1,
-  'switch': 3,
-  'light': 3,
+  sensor: 1,
+  binary_sensor: 1,
+  switch: 3,
+  light: 3,
 };
 
 export function getScrollListDataConfig(dataList) {
-  let previousType = '';
+  let previousType = "";
   let currentIndex = -1;
-  const dataTypeConfig = []
+  const dataTypeConfig = [];
   dataList.forEach((item, index) => {
     let currentType = item.type;
     if (currentType !== previousType) {
@@ -28,3 +28,6 @@ export function getScrollListDataConfig(dataList) {
   const dataTypeConfigCount = dataTypeConfig.length;
   return { dataTypeConfig, dataTypeConfigCount };
 }
+
+export const generateRandomString = (length = 6) =>
+  Math.random().toString(20).substr(2, length);
