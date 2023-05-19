@@ -224,7 +224,7 @@ class Index extends AppPage {
     }
     onDestroy() {
         timer.stopTimer(this.state.reloadTimer)
-     }
+    }
 }
 
 export default Index;

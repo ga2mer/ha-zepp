@@ -24,7 +24,7 @@ class Index extends AppPage {
     this.state.isPlaying = false;
   }
   addWidgets(widgets) {
-    this.state.widgets.push(...widgets);
+    this.app.widgets.push(...widgets);
   }
   destroyTimers() {
     if (this.state.arcUpdateTimer) {
@@ -85,7 +85,7 @@ class Index extends AppPage {
           );
           page.setArcPosition(
             page.state.item.attributes.media_position /
-              page.state.item.attributes.media_duration
+            page.state.item.attributes.media_duration
           );
 
           if (
@@ -136,7 +136,7 @@ class Index extends AppPage {
     if (this.state.positionArc) {
       this.setArcPosition(
         this.state.item.attributes.media_position /
-          this.state.item.attributes.media_duration
+        this.state.item.attributes.media_duration
       );
       this.setArcUpdateTimer(this.state.isPlaying);
     }
@@ -154,7 +154,7 @@ class Index extends AppPage {
       );
 
     if (typeof this.state.item.attributes.volume_level === "number")
-      this.volumeSlider.setPosition(this.state.item.attributes.volume_level);
+      this.state.volumeSlider.setPosition(this.state.item.attributes.volume_level);
   }
   drawElements() {
     this.state.rendered = false;
@@ -328,12 +328,11 @@ class Index extends AppPage {
   onInit(param) {
     logger.log("onInit");
     logger.log("param", param);
-    this.state.item = JSON.parse(param);
-    messageBuilder.on("call", ({ payload: buf }) => {});
+    this.state.item = param;
     this.drawWait();
     this.getSensorInfo();
   }
-  onRender() {}
+  onRender() { }
   onDestroy() {
     this.destroyTimers();
   }
