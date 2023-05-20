@@ -188,6 +188,11 @@ class Index extends AppPage {
     this.createElement("end");
     this.state.rendered = true;
   }
+  onBack(props) {
+    if (props.path === 'test_page') {
+      console.log(JSON.stringify(props));
+    }
+  }
   onDestroy() {
     messageBuilder.off("call", this.onMessage);
   }
