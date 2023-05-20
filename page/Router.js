@@ -34,23 +34,31 @@ class Router {
       page: module,
     });
   }
-  getCurrentPageId() {
+  getCurrentPage() {
     const lastItem = this.history[this.history.length - 1];
-    return lastItem.page.id;
+    return lastItem.page;
+  }
+  getCurrentPageId() {
+    const lastItem = this.getCurrentPage();
+    return lastItem.id;
   }
   back(params) {
     try {
       this.app.clearWidgets();
+      const currentPage = this.getCurrentPage();
+      if (currentPage.onDestroy) {
+        currentPage.onDestroy();
+      }
       if (this.history.length === 1) {
         return hmApp.goBack();
       }
       this.history.pop();
-      const lastItem = this.history[this.history.length - 1];
-      if (lastItem.page.onBack) {
-        lastItem.page.onBack(params);
+      const previousPage = this.getCurrentPage();
+      if (previousPage.onBack) {
+        previousPage.onBack(params);
       }
-      if (lastItem.page.onRender) {
-        lastItem.page.onRender();
+      if (previousPage.onRender) {
+        previousPage.onRender();
       }
     } catch (e) {
       console.log(e.message);
