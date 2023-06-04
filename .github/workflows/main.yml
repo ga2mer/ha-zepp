@@ -14,4 +14,4 @@ jobs:
     - uses: actions/upload-artifact@v3
       with:
         name: ha-zepp.zab
-        path: dist/
+        path: dist/*.zab
