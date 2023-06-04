@@ -1,17 +1,25 @@
 name: CI
-on: push
+on:
+  push:
+    branches:
+      - "main"
 
 jobs:
   build:
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-node@v3
-      with:
-        node-version: '16.x'
-    - run: npm i @zeppos/zeus-cli -g
-    - run: zeus build
-    - uses: actions/upload-artifact@v3
-      with:
-        name: ha-zepp.zab
-        path: dist/*.zab
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16.x'
+      - run: npm i @zeppos/zeus-cli -g
+      - run: zeus build
+      - run: mv dist/*.zab dist/ha-zepp.zab
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "latest"
+          prerelease: true
+          title: "Development Build"
+          files: |
+            dist/ha-zepp.zab
