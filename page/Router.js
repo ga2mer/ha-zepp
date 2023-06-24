@@ -34,23 +34,43 @@ class Router {
       page: module,
     });
   }
-  getCurrentPageId() {
-    const lastItem = this.history[this.history.length - 1];
-    return lastItem.page.id;
+  getCurrentRoute() {
+    return this.history[this.history.length - 1];
   }
-  back(params) {
+  getCurrentPath() {
+    return this.getCurrentRoute().path;
+  }
+  getCurrentPage() {
+    return this.getCurrentRoute().page;
+  }
+  getCurrentPageId() {
+    const lastItem = this.getCurrentPage();
+    return lastItem.id;
+  }
+  back() {
     try {
       this.app.clearWidgets();
+      const currentPage = this.getCurrentPage();
+      let backProps = {
+        path: this.getCurrentPath(),
+        params: {},
+      };
+      if (currentPage.onDestroy) {
+        const destroyParams = currentPage.onDestroy();
+        if (destroyParams) {
+          backProps.params = destroyParams;
+        }
+      }
       if (this.history.length === 1) {
         return hmApp.goBack();
       }
       this.history.pop();
-      const lastItem = this.history[this.history.length - 1];
-      if (lastItem.page.onBack) {
-        lastItem.page.onBack(params);
+      const previousPage = this.getCurrentPage();
+      if (previousPage.onBack) {
+        previousPage.onBack(backProps);
       }
-      if (lastItem.page.onRender) {
-        lastItem.page.onRender();
+      if (previousPage.onRender) {
+        previousPage.onRender();
       }
     } catch (e) {
       console.log(e.message);

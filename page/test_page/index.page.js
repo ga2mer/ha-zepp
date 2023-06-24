@@ -114,6 +114,9 @@ class Index extends AppPage {
     logger.log("onInit");
     this.drawElements();
   }
+  onDestroy() {
+    return { foo: 'bar' };
+  }
 }
 
 export default Index;
