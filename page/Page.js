@@ -75,8 +75,11 @@ class AppPage {
   drawNoBLEConnect() {
     return this.drawTextMessage("No connection to\n the application");
   }
-  drawWait() {
-    return this.drawTextMessage('Loading...');
+  drawWait(message = null) {
+    let text = 'Loading...'
+    if (message)
+      text += "\n" + message
+    return this.drawTextMessage(text);
   }
   drawError(message) {
     let text = "An error occurred";

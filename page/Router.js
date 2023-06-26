@@ -5,6 +5,7 @@ import EffectPicker from './light/effectPicker.page';
 import MediaPlayer from './media_player/index.page';
 import TestPage from './test_page/index.page';
 import PageNotFound from './PageNotFound';
+import ColorPicker from './light/colorPicker.page';
 
 class Router {
   constructor(app) {
@@ -13,14 +14,18 @@ class Router {
       'home': HomePage,
       'light': LightPage,
       'light/effect_picker': EffectPicker,
+      'light/color_picker': ColorPicker,
       'media_player': MediaPlayer,
       'test_page': TestPage,
     };
     this.pageId = 0;
     this.history = [];
+
+    this.modalInstance = null;
+    this.modalShown = false;
   }
-  init() {}
-  destroy() {}
+  init() { }
+  destroy() { }
   go(path, params = {}) {
     let Module = this.routes[path];
     if (!Module) Module = PageNotFound; // render 404;
@@ -49,28 +54,33 @@ class Router {
   }
   back() {
     try {
-      this.app.clearWidgets();
-      const currentPage = this.getCurrentPage();
-      let backProps = {
-        path: this.getCurrentPath(),
-        params: {},
-      };
-      if (currentPage.onDestroy) {
-        const destroyParams = currentPage.onDestroy();
-        if (destroyParams) {
-          backProps.params = destroyParams;
+      if (this.modalShown) {
+        this.hideModal()
+      }
+      else {
+        this.app.clearWidgets();
+        const currentPage = this.getCurrentPage();
+        let backProps = {
+          path: this.getCurrentPath(),
+          params: {},
+        };
+        if (currentPage.onDestroy) {
+          const destroyParams = currentPage.onDestroy();
+          if (destroyParams) {
+            backProps.params = destroyParams;
+          }
         }
-      }
-      if (this.history.length === 1) {
-        return hmApp.goBack();
-      }
-      this.history.pop();
-      const previousPage = this.getCurrentPage();
-      if (previousPage.onBack) {
-        previousPage.onBack(backProps);
-      }
-      if (previousPage.onRender) {
-        previousPage.onRender();
+        if (this.history.length === 1) {
+          return hmApp.goBack();
+        }
+        this.history.pop();
+        const previousPage = this.getCurrentPage();
+        if (previousPage.onBack) {
+          previousPage.onBack(backProps);
+        }
+        if (previousPage.onRender) {
+          previousPage.onRender();
+        }
       }
     } catch (e) {
       console.log(e.message);
@@ -78,6 +88,26 @@ class Router {
         text: 'Crash'
       })
     }
+  }
+  showModal(modalObject) {
+    if (this.modalShown) return;
+
+    this.modalInstance = modalObject;
+    this.modalInstance.onShow();
+
+    this.modalShown = true;
+  }
+  hideModal() {
+    if (!this.modalShown) return;
+
+    this.modalInstance.onHide();
+    hmUI.redraw();
+
+    this.modalInstance = null;
+    this.modalShown = false;
+  }
+  isModalShown() {
+    return this.modalShown
   }
 }
 

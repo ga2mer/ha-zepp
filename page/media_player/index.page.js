@@ -5,6 +5,8 @@ import {
   TOP_BOTTOM_OFFSET,
 } from "../home/index.style";
 import { createSlider } from "../../controls/slider";
+import { createProgressBar } from "../../controls/progressBar";
+import NativeSliderModal from "../modal/NativeSliderModal";
 const { messageBuilder } = getApp()._options.globalData;
 const logger = DeviceRuntimeCore.HmLogger.getLogger("ha-zepp-mediaplayer");
 
@@ -15,7 +17,7 @@ class Index extends AppPage {
     this.state.rendered = false;
     this.state.reloadTimer = null;
     this.state.arcUpdateTimer = null;
-    // this.state.sliderPoint: null;
+    this.state.volumeBar = null;
     this.state.volumeSlider = null;
     this.state.titleText = null;
     this.state.artistText = null;
@@ -36,9 +38,6 @@ class Index extends AppPage {
       timer.stopTimer(this.state.reloadTimer);
       this.state.reloadTimer = null;
     }
-  }
-  drawWait() {
-    return this.drawTextMessage(`Loading...\n${this.state.item.title}`);
   }
   getSensorInfo() {
     messageBuilder
@@ -127,11 +126,9 @@ class Index extends AppPage {
   updateElementsData() {
     this.state.isPlaying = this.state.item.state === "playing";
 
-    if (this.state.isPlaying) {
-      this.state.playButton.setProperty(hmUI.prop.MORE, {
-        src: (this.state.isPlaying ? "pause" : "play") + ".png",
-      });
-    }
+    this.state.playButton.setProperty(hmUI.prop.MORE, {
+      src: (this.state.isPlaying ? "pause" : "play") + ".png"
+    })
 
     if (this.state.positionArc) {
       this.setArcPosition(
@@ -153,8 +150,13 @@ class Index extends AppPage {
         this.state.item.attributes.media_artist
       );
 
-    if (typeof this.state.item.attributes.volume_level === "number")
+    if (typeof this.state.item.attributes.is_volume_muted === "boolean")
+      this.state.volumeSlider.setButtonToggle(this.state.item.attributes.is_volume_muted);
+
+    if (typeof this.state.item.attributes.volume_level === "number") {
+      this.state.volumeBar.setPosition(this.state.item.attributes.volume_level);
       this.state.volumeSlider.setPosition(this.state.item.attributes.volume_level);
+    }
   }
   drawElements() {
     this.state.rendered = false;
@@ -199,10 +201,7 @@ class Index extends AppPage {
     });
     this.state.y += titleHeight + 20;
 
-    if (
-      typeof this.state.item.attributes.media_duration === "number" &&
-      typeof this.state.item.attributes.media_position === "number"
-    ) {
+    if (this.state.item.attributes.media_duration && this.state.item.attributes.media_position) {
       this.createWidget(hmUI.widget.ARC, {
         x: DEVICE_WIDTH / 2 - DEVICE_WIDTH / 4,
         y: this.state.y,
@@ -277,32 +276,67 @@ class Index extends AppPage {
     }
 
     if (typeof this.state.item.attributes.volume_level === "number") {
-      this.state.volumeSlider = createSlider({
+      let volumeSliderButton = null;
+
+      if (typeof this.state.item.attributes.is_volume_muted === "boolean") {
+        volumeSliderButton = {
+          image: "volume_off.png",
+          onButtonToggle: (ctx, newValue) => {
+            ctx.state.item.attributes.is_volume_muted = newValue
+
+            messageBuilder.request(
+              {
+                method: "MEDIA_ACTION",
+                entity_id: ctx.state.item.key,
+                value: `{"is_volume_muted": ${newValue}}`,
+                service: "volume_mute"
+              });
+          }
+        }
+      }
+
+      let onSliderMove = (ctx, floatpos, isUserInput) => {
+        logger.log("nativeslider input", floatpos)
+
+        if (ctx.state.rendered && isUserInput) {
+          messageBuilder.request(
+            {
+              method: "MEDIA_ACTION",
+              entity_id: ctx.state.item.key,
+              value: `{"volume_level": ${floatpos}}`,
+              service: "volume_set"
+            });
+          ctx.state.volumeBar.setPosition(floatpos);
+          ctx.state.item.attributes.volume_level = floatpos
+        }
+      };
+
+      this.state.volumeSlider = new NativeSliderModal(onSliderMove, this,
+        {
+          stateImages: ["volume_min_1.png", "volume_min_2.png", "volume_mid.png", "volume_mid.png", "volume_max.png", "volume_max.png"],
+          button: volumeSliderButton,
+          backColor: 0x303030,
+          frontColor: 0xf0f0f0
+        })
+
+      this.state.volumeBar = createProgressBar({
         x: 10,
         y: DEVICE_HEIGHT - 130,
         h: 24,
         w: DEVICE_WIDTH - 20,
         backColor: 0x262626,
         frontColor: 0xffffff,
-        buttons: {
-          img_down: "volume_down.png",
-          img_up: "volume_up.png",
-          change_amt: 0.1,
-        },
-        hasPoint: false,
+        src: "volume_up.png",
         ctx: this,
-        onSliderMove: (ctx, floatvalue, isUserInput) => {
-          if (ctx.state.rendered && isUserInput)
-            messageBuilder.request({
-              method: "MEDIA_ACTION",
-              entity_id: ctx.state.item.key,
-              value: `{"volume_level": ${floatvalue}}`,
-              service: "volume_set",
-            });
+        onClick: (ctx) => {
+          if (!ctx.state.rendered) return
+          ctx.router.showModal(ctx.state.volumeSlider)
+          this.state.volumeSlider.setPosition(ctx.state.item.attributes.volume_level)
+          this.state.volumeSlider.setButtonToggle(ctx.state.item.attributes.is_volume_muted)
         },
       });
       this.state.y += 12 * 2 + 20;
-      this.addWidgets(this.state.volumeSlider.components);
+      this.addWidgets(this.state.volumeBar.components);
     }
 
     if (this.state.item.attributes.supported_features & 32) {
@@ -329,10 +363,12 @@ class Index extends AppPage {
     logger.log("onInit");
     logger.log("param", param);
     this.state.item = param;
-    this.drawWait();
+  }
+  onRender() {
+    hmUI.setLayerScrolling(false);
+    this.drawWait(this.state.item.title);
     this.getSensorInfo();
   }
-  onRender() { }
   onDestroy() {
     this.destroyTimers();
   }
