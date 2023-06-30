@@ -1,7 +1,8 @@
 import AppPage from "../Page";
 
-import { DEVICE_WIDTH } from "../home/index.style";
+import { DEVICE_WIDTH, BUTTON_COLOR_NORMAL, BUTTON_COLOR_PRESSED } from "../home/index.style";
 import { createSlider } from "../../controls/slider";
+import BetterDialogModal from "../modal/BetterDialogModal";
 const { messageBuilder } = getApp()._options.globalData;
 const logger = DeviceRuntimeCore.HmLogger.getLogger("ha-zepp-testpage");
 
@@ -9,6 +10,7 @@ class Index extends AppPage {
   constructor(...props) {
     super(...props);
     this.state.rendered = false;
+    this.dialogModal = null;
   }
   addWidget(widget) {
     this.app.widgets.push(...widget);
@@ -107,6 +109,25 @@ class Index extends AppPage {
     });
     this.state.y += 12 * 2 + 20;
     this.addWidget(buttonSlider.components);
+
+    this.dialogModal = new BetterDialogModal(this.app,
+      "Very very very very long title",
+      "The quick brown fox jumps over the lazy dog\nThe quick brown fox jumps over the lazy dog\nLorem imsum blah blah blah",
+      ["close_img.png", "pig_img.png", "ok_img.png"],
+      (buttonIndex) => {logger.log("modal click button " + buttonIndex)})
+
+    this.createWidget(hmUI.widget.BUTTON, {
+      x: 10,
+      y: this.state.y,
+      w: DEVICE_WIDTH - 20,
+      h: 48,
+      text: "dialog",
+      normal_color: BUTTON_COLOR_NORMAL,
+      press_color: BUTTON_COLOR_PRESSED,
+      click_func: () => {
+        this.router.showModal(this.dialogModal)
+      }
+    })
 
     this.state.rendered = true;
   }
