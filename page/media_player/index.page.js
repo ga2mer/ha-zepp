@@ -25,9 +25,6 @@ class Index extends AppPage {
     this.state.playButton = null;
     this.state.isPlaying = false;
   }
-  addWidgets(widgets) {
-    this.app.widgets.push(...widgets);
-  }
   destroyTimers() {
     if (this.state.arcUpdateTimer) {
       timer.stopTimer(this.state.arcUpdateTimer);
@@ -311,7 +308,7 @@ class Index extends AppPage {
         }
       };
 
-      this.state.volumeSlider = new NativeSliderModal(onSliderMove, this,
+      this.state.volumeSlider = new NativeSliderModal(this.app, onSliderMove, this,
         {
           stateImages: ["volume_min_1.png", "volume_min_2.png", "volume_mid.png", "volume_mid.png", "volume_max.png", "volume_max.png"],
           button: volumeSliderButton,

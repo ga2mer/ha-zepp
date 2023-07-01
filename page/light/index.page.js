@@ -1,7 +1,6 @@
 import AppPage from '../Page';
 
 import { DEVICE_WIDTH } from "../home/index.style";
-import { createSlider } from "../../controls/slider";
 import { createProgressBar } from '../../controls/progressBar';
 import NativeSliderModal from '../modal/NativeSliderModal';
 import { rgbColorPack, shadeRGBColor } from '../../utils';
@@ -17,9 +16,6 @@ class Index extends AppPage {
         this.state.brightnessText = null;
         this.state.brightnessBar = null;
         this.state.brightnessModal = null;
-    }
-    addWidgets(widgets) {
-        this.app.widgets.push(...widgets);
     }
     getSensorInfo() {
         messageBuilder
@@ -79,7 +75,7 @@ class Index extends AppPage {
                     });
         };
 
-        this.state.brightnessModal = new NativeSliderModal(onSliderMove, this,
+        this.state.brightnessModal = new NativeSliderModal(this.app, onSliderMove, this,
             {
                 stateImages: ["brightness_min_1.png", "brightness_min_2.png", "brightness_mid.png", "brightness_mid.png", "brightness_max.png", "brightness_max.png"],
                 backColor: 0x303030,

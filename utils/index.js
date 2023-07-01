@@ -84,6 +84,15 @@ export function blendRGBColors(color1, color2, percent) {
   ];
 }
 
+export function getEveryNth(arr, nth, start = 0) {
+  const result = [];
+
+  for (let index = start; index < arr.length; index += nth) {
+    result.push(arr[index]);
+  }
+
+  return result;
+}
 
 export const generateRandomString = (length = 6) =>
   Math.random().toString(20).substr(2, length);

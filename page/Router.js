@@ -6,6 +6,7 @@ import MediaPlayer from './media_player/index.page';
 import TestPage from './test_page/index.page';
 import PageNotFound from './PageNotFound';
 import ColorPicker from './light/colorPicker.page';
+import SensorPage from './sensor/index.page';
 
 class Router {
   constructor(app) {
@@ -16,6 +17,7 @@ class Router {
       'light/effect_picker': EffectPicker,
       'light/color_picker': ColorPicker,
       'media_player': MediaPlayer,
+      'sensor': SensorPage,
       'test_page': TestPage,
     };
     this.pageId = 0;

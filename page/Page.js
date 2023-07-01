@@ -38,6 +38,10 @@ class AppPage {
     this.state.y = TOP_BOTTOM_OFFSET;
   }
 
+  addWidgets(widgets) {
+    this.app.widgets.push(...widgets);
+  }
+
   drawTextMessage(message, button) {
     this.clearWidgets();
 

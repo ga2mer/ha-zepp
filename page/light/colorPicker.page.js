@@ -72,7 +72,7 @@ class ColorPicker extends AppPage {
         press_color: rgbColorPack(shadeRGBColor(this.state.item.attributes.rgb_color, -0.3)),
         click_func: () => {
           let scrollY = this.state.selectedColorY - DEVICE_HEIGHT / 2 + TOP_BOTTOM_OFFSET
-          hmApp.setLayerY(-1 * Math.min(Math.max(scrollY,0), this.state.lastY))
+          hmApp.setLayerY(-1 * Math.min(Math.max(scrollY, 0), this.state.lastY))
         }
       })
 
@@ -128,19 +128,19 @@ class ColorPicker extends AppPage {
           for (var s = 0; s < 3; s++) {
             let shadecolor = blendRGBColors(midcolor, [255, 255, 255], (1 / 3) * s)
 
-            let colorrect = this.createWidget(hmUI.widget.FILL_RECT, {
+            let rectX = nextX
+            let rectY = this.state.y
+            let colorrect = this.createWidget(hmUI.widget.BUTTON, {
               x: nextX,
               y: this.state.y,
               h: colorRectSize,
               w: colorRectSize,
               radius: colorRectSize / 2,
-              color: rgbColorPack(shadecolor)
-            })
-            let rectX = nextX + 0
-            let rectY = this.state.y + 0
-            colorrect.addEventListener(hmUI.event.CLICK_UP, (info) => {
-              // console.log(this.getProperty(hmUI.prop.X) + " " + this.getProperty(hmUI.prop.Y))
-              onColorSelect(shadecolor, rectX, rectY)
+              normal_color: rgbColorPack(shadecolor),
+              press_color: rgbColorPack(shadecolor),
+              click_func: () => {
+                onColorSelect(shadecolor, rectX, rectY)
+              }
             })
 
             let currcolor = this.state.item.attributes.rgb_color

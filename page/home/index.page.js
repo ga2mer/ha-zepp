@@ -92,7 +92,7 @@ class Index extends AppPage {
       align_h: hmUI.align.CENTER_H,
     });
 
-    if (item.type === "light" || item.type === "media_player") {
+    if ((item.type === "light" || item.type === "media_player" || item.type === "sensor") && item.state != "unavailable") {
       const iconsize = 24
       this.createWidget(hmUI.widget.BUTTON, {
         x: DEVICE_WIDTH - iconsize - 5,
@@ -163,7 +163,6 @@ class Index extends AppPage {
         y: this.state.y,
         w: DEVICE_WIDTH,
         h: TOP_BOTTOM_OFFSET,
-        text: "",
         text: "   ",
         click_func: () => {
           this.router.go('test_page');

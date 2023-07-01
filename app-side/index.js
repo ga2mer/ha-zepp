@@ -80,6 +80,26 @@ async function getEnabledSensors() {
   return enabledSensors;
 }
 
+function selectProps(...props) {
+  return function (obj) {
+    const newObj = {};
+    props.forEach(name => {
+      newObj[name] = obj[name];
+    });
+
+    return newObj;
+  }
+}
+
+async function getSensorLog(entity_id) {
+  console.log("getSensorLog", entity_id)
+  const { body } = await request(`/api/history/period?minimal_response&no_attributes&significant_changes_only&filter_entity_id=${entity_id}`);
+  const log = typeof body === "string" ? JSON.parse(body)[0] : body[0];
+  let shortLog = log.map(e=>e.state).slice(-15)
+  console.log(shortLog)
+  return shortLog
+}
+
 async function getSensorState(entity_id) {
   const { body } = await request(`/api/states/${entity_id}`);
   const sensor = typeof body === "string" ? JSON.parse(body) : body;
@@ -102,6 +122,11 @@ async function getSensorState(entity_id) {
     state,
     type: sensor.entity_id.split(".")[0],
     attributes: {}
+  }
+
+  if (actualSensor.type === "sensor") {
+    actualSensor.attributes.device_class = sensor.attributes.device_class
+    actualSensor.last_changed = sensor.last_changed
   }
 
   if (actualSensor.type === "light") {
@@ -234,6 +259,15 @@ AppSideService({
         try {
           const sensorState = await getSensorState(payload.entity_id);
           ctx.response({ data: { result: sensorState } });
+        } catch (e) {
+          ctx.response({ data: { error: e.message } });
+        }
+      }
+
+      if (payload.method === "GET_SENSOR_LOG") {
+        try {
+          const sensorLog = await getSensorLog(payload.entity_id);
+          ctx.response({ data: { result: sensorLog } });
         } catch (e) {
           ctx.response({ data: { error: e.message } });
         }

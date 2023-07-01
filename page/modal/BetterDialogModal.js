@@ -30,10 +30,10 @@ class BetterDialogModal extends Modal {
         if (this.app.router.isModalShown()) return
         super.onShow()
 
-        let buttonHeight = 0;
+        var buttonHeight = 0;
 
         if (this.props.buttons) {
-            buttonHeight = 58
+            buttonHeight = 58 * 2
             const buttonMargin = 6
             const buttonWidth = (DEVICE_WIDTH - (buttonMargin * (this.props.buttons.length - 1))) / this.props.buttons.length
 
@@ -67,7 +67,7 @@ class BetterDialogModal extends Modal {
                 })
                 btnImg.setEnable(false)
                 this.controls.buttons.push(btnImg)
-                
+
                 nextX += buttonWidth
 
                 if (i != (this.props.buttons.length - 1)) {
@@ -76,35 +76,25 @@ class BetterDialogModal extends Modal {
             }
         }
 
-        const { titleWidth, titleHeight } = hmUI.getTextLayout(this.props.title,
-            {
-                text_size: 21,
-                text_width: DEVICE_WIDTH,
-                wrapped: 0
-            });
+        const titleHeight = 48;
 
-        this.controls.title = hmUI.createWidget(hmUI.widget.BUTTON, {
+        this.controls.title = hmUI.createWidget(hmUI.widget.TEXT, {
             x: 0,
             y: TOP_BOTTOM_OFFSET,
-            w: titleWidth,
-            h: titleHeight,
+            w: DEVICE_WIDTH,
+            h: titleHeight * 2,
+            color: 0xffffff,
             text_size: 21,
             text: this.props.title
         })
 
         if (this.props.text) {
-            const { textWidth, textHeight } = hmUI.getTextLayout(this.props.text,
-                {
-                    text_size: 19,
-                    text_width: DEVICE_WIDTH,
-                    wrapped: 1
-                });
-                logger.log(TOP_BOTTOM_OFFSET + titleHeight + ((this.DEVICE_HEIGHT - (TOP_BOTTOM_OFFSET + titleHeight + buttonHeight)) / 2) - (textHeight / 2))
-            this.controls.text = hmUI.createWidget(hmUI.widget.BUTTON, {
+            this.controls.text = hmUI.createWidget(hmUI.widget.TEXT, {
                 x: 0,
-                y: TOP_BOTTOM_OFFSET + titleHeight + ((this.DEVICE_HEIGHT - (TOP_BOTTOM_OFFSET + titleHeight + buttonHeight)) / 2) - (textHeight / 2),
-                w: textWidth,
-                h: textHeight,
+                y: TOP_BOTTOM_OFFSET + (titleHeight * 2) + 20,
+                w: DEVICE_WIDTH,
+                h: DEVICE_HEIGHT - (TOP_BOTTOM_OFFSET + (titleHeight * 2)) - buttonHeight - 20,
+                color: 0xdadada,
                 text_size: 19,
                 text: this.props.text
             })
@@ -114,7 +104,7 @@ class BetterDialogModal extends Modal {
     onHide() {
         if (!this.app.router.isModalShown()) return
 
-        for (var i = 0; i < this.controls.buttons; i++) {
+        for (var i = 0; i < this.controls.buttons.length; i++) {
             hmUI.deleteWidget(this.controls.buttons[i])
         }
 
