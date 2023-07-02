@@ -185,7 +185,7 @@ class ColorPicker extends AppPage {
   }
   onRender() {
     this.drawElements();
-    hmUI.setLayerScrolling(true);
+    this.app.setLayerScrolling(true);
   }
   onDestroy() { hmApp.setLayerY(0) }
 }

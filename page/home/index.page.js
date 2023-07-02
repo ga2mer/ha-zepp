@@ -23,7 +23,6 @@ class Index extends AppPage {
     }
   }
   onInit(param) {
-    hmUI.setLayerScrolling(true);
     if (hmBle.connectStatus()) {
       this.setState({
         loading: true,
@@ -37,6 +36,7 @@ class Index extends AppPage {
     messageBuilder.on("call", this.onMessage);
   }
   onRender() {
+    this.app.setLayerScrolling(true);
     if (this.state.loading) {
       this.drawWait();
     } else if (this.state.error) {
@@ -81,18 +81,19 @@ class Index extends AppPage {
       color: 0xaaaaaa,
       align_h: hmUI.align.CENTER_H,
     });
+
     this.createWidget(hmUI.widget.TEXT, {
       x: 0,
       y: this.state.y + titleHeight,
       w: DEVICE_WIDTH,
       h: valueHeight,
-      text: item.state,
+      text: item.state + (item.unit || ""),
       text_size: 16,
       color: 0xffffff,
       align_h: hmUI.align.CENTER_H,
     });
 
-    if ((item.type === "light" || item.type === "media_player" || item.type === "sensor") && item.state != "unavailable") {
+    if ((item.type === "light" || item.type === "media_player" || (item.type === "sensor" && !isNaN(item.state))) && item.state != "unavailable") {
       const iconsize = 24
       this.createWidget(hmUI.widget.BUTTON, {
         x: DEVICE_WIDTH - iconsize - 5,

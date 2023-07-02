@@ -235,7 +235,7 @@ class Index extends AppPage {
         this.state.item = param;
     }
     onRender() {
-        hmUI.setLayerScrolling(false);
+        this.app.setLayerScrolling(false);
         this.drawWait()
         this.getSensorInfo()
     }

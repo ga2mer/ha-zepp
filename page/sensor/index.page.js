@@ -108,20 +108,10 @@ class SensorPage extends AppPage {
             align_v: hmUI.align.CENTER_V,
             color: 0xffffff,
             text_size: 21,
-            text: this.item.state
+            text: this.item.state + (this.item.unit || "")
         })
 
         this.state.y += imgSize + 10
-
-        this.createWidget(hmUI.widget.TEXT, {
-            x: 10,
-            y: this.state.y,
-            h: 24,
-            w: DEVICE_WIDTH / 2,
-            color: 0xffffff,
-            text_size: 19,
-            text: "Updated:"
-        })
 
         this.createWidget(hmUI.widget.TEXT, {
             x: 10,
@@ -179,16 +169,20 @@ class SensorPage extends AppPage {
             this.state.y += 24 + 5
         }
         else {
+            //pretty dumb code, i`m sorry.. but it works ;)
             const viewHeight = DEVICE_HEIGHT - this.state.y - TOP_BOTTOM_OFFSET
             const data_array = log.map(e => Math.ceil(parseFloat(e)))
             const data_min_value = Math.min(...data_array)
             const data_max_value = Math.max(...data_array)
 
-            const unique_data_array = [...new Set(data_array)].sort()
-            
-            var y_text_array = [unique_data_array[0], ...getEveryNth(unique_data_array.slice(1,-1), 2, 0), unique_data_array[unique_data_array.length - 1]].map(e => e.toString());
-            console.log(data_array, "  ", data_min_value, data_max_value, data_array.length)
-            console.log(y_text_array)
+            const data_middle_mult = (data_max_value - data_min_value) / 4
+            var y_text_array = [
+                data_min_value,
+                data_min_value + data_middle_mult,
+                data_min_value + data_middle_mult * 2,
+                data_min_value + data_middle_mult * 3,
+                data_max_value
+            ].map(e => Math.round(e).toString());
 
             const item_width = (DEVICE_WIDTH - 10 - (data_array.length) * 5) / data_array.length
 
@@ -201,7 +195,7 @@ class SensorPage extends AppPage {
                 item_space: 5,
                 item_radius: item_width / 2,
                 item_start_y: 20,
-                item_max_height:viewHeight-20, 
+                item_max_height: viewHeight - 20,
                 item_color: BUTTON_COLOR_PRESSED,
                 data_array,
                 data_count: data_array.length,

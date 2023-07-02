@@ -29,6 +29,11 @@ class Router {
   init() { }
   destroy() { }
   go(path, params = {}) {
+    if (this.app.getLayerScrolling()) {
+      hmApp.setLayerY(0)
+      this.app.setLayerScrolling(false)
+    }
+
     let Module = this.routes[path];
     if (!Module) Module = PageNotFound; // render 404;
     this.app.clearWidgets();
@@ -60,6 +65,10 @@ class Router {
         this.hideModal()
       }
       else {
+        if (this.app.getLayerScrolling()) {
+          hmApp.setLayerY(0)
+          this.app.setLayerScrolling(false)
+        }
         this.app.clearWidgets();
         const currentPage = this.getCurrentPage();
         let backProps = {
