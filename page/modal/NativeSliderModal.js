@@ -102,14 +102,7 @@ class NativeSliderModal extends Modal {
         if (this.app.router.isModalShown()) return
         super.onShow()
         logger.log("showing")
-        this.backgroundRectangle = hmUI.createWidget(hmUI.widget.FILL_RECT, {
-            h: DEVICE_HEIGHT,
-            w: DEVICE_WIDTH,
-            x: 0,
-            y: 0,
-            color: 0x000000
-        })
-
+        
         this.sliderBottom = hmUI.createWidget(hmUI.widget.FILL_RECT, {
             x: POS_X,
             y: POS_Y,
@@ -220,8 +213,6 @@ class NativeSliderModal extends Modal {
         hmUI.deleteWidget(this.outlineStroke)
         hmUI.deleteWidget(this.sliderTop)
         hmUI.deleteWidget(this.sliderBottom)
-        
-        hmUI.deleteWidget(this.backgroundRectangle)
         
         if (this.props.stateImages) {
             hmUI.deleteWidget(this.stateImage)

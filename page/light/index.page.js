@@ -179,7 +179,7 @@ class Index extends AppPage {
                         timer.stopTimer(page.state.reloadTimer)
                         page.state.reloadTimer = null
                         page.clearWidgets()
-                        page.drawWait(this.state.item.title)
+                        page.drawWait(page.state.item.title)
                         page.getSensorInfo()
                     },
                     this

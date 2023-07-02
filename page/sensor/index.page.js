@@ -156,7 +156,7 @@ class SensorPage extends AppPage {
      * @param {Array<string>} log 
      */
     drawLog(log) {
-        if (log == null) {
+        if (log == null || log.length <= 3) {
             this.createWidget(hmUI.widget.TEXT, {
                 x: 10,
                 y: this.state.y,
@@ -164,7 +164,7 @@ class SensorPage extends AppPage {
                 w: DEVICE_WIDTH - 20,
                 color: 0xffffff,
                 text_size: 17,
-                text: "error while loading history"
+                text: log == null ? "error while loading history" : "history is too short"
             })
             this.state.y += 24 + 5
         }
@@ -184,7 +184,9 @@ class SensorPage extends AppPage {
                 data_max_value
             ].map(e => Math.round(e).toString());
 
-            const item_width = (DEVICE_WIDTH - 10 - (data_array.length) * 5) / data_array.length
+            const item_width = Math.min(30, (DEVICE_WIDTH - 10 - (data_array.length) * 5) / data_array.length)
+
+            console.log(item_width, (DEVICE_WIDTH - 10 - (data_array.length) * 5) / data_array.length)
 
             const view = this.createWidget(hmUI.widget.HISTOGRAM, {
                 x: 5,
