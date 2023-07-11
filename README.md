@@ -1,7 +1,13 @@
 # Home Assistant companion for Zepp OS devices
 Application that allows you to control a smart home based on the Home Assistant
 
-##Screenshots
+## Features
+- Sensor status and graph
+- Toggle switch
+- Toggle light, change its effect, brightness and color (if this possible)
+- Media player support with play/pause, prev/next, volume control
+
+## Screenshots  
 ![image](images/1.png)  
 <details>
   <summary>Light</summary>
@@ -19,12 +25,6 @@ Application that allows you to control a smart home based on the Home Assistant
   <summary>Sensor</summary>
   <img src="images/4.png">
 </details>
-
-## Features
-- Sensor status and graph
-- Toggle switch
-- Toggle light, change its effect, brightness and color (if this possible)
-- Media player support with play/pause, prev/next, volume control
 
 ### To Do:
 - Editing colors for lights
