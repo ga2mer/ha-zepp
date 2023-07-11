@@ -4,7 +4,7 @@ import { DEVICE_HEIGHT, DEVICE_WIDTH, TOP_BOTTOM_OFFSET, BUTTON_COLOR_NORMAL, BU
 /**
  * better than stock :-)
  */
-const logger = DeviceRuntimeCore.HmLogger.getLogger("ha-zepp-nativeslider");
+const logger = DeviceRuntimeCore.HmLogger.getLogger("ha-zepp-betterdialog");
 
 class BetterDialogModal extends Modal {
 

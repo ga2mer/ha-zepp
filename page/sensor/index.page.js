@@ -65,7 +65,7 @@ class SensorPage extends AppPage {
                 this.drawLog(result);
             })
             .catch((res) => {
-                console.log(res)
+                logger.log(res)
                 this.drawLog(null);
             });
     }
@@ -185,8 +185,6 @@ class SensorPage extends AppPage {
             ].map(e => Math.round(e).toString());
 
             const item_width = Math.min(30, (DEVICE_WIDTH - 10 - (data_array.length) * 5) / data_array.length)
-
-            console.log(item_width, (DEVICE_WIDTH - 10 - (data_array.length) * 5) / data_array.length)
 
             const view = this.createWidget(hmUI.widget.HISTOGRAM, {
                 x: 5,

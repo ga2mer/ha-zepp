@@ -1,5 +1,6 @@
 import AppPage from "../Page";
 import {
+  BUTTON_COLOR_PRESSED,
   DEVICE_HEIGHT,
   DEVICE_WIDTH,
   TOP_BOTTOM_OFFSET,
@@ -165,6 +166,7 @@ class Index extends AppPage {
     }
 
     const seekButtonsHeight = 60;
+    const seekImgSize = 48;
 
     if (this.state.item.attributes.supported_features & 16) {
       //PREVIOUS_TRACK  https://github.com/home-assistant/core/blob/e9705364a80fff9c18e2e24b0c0dceff0a71df6e/homeassistant/components/media_player/const.py#L179
@@ -173,12 +175,20 @@ class Index extends AppPage {
         y: 0,
         w: DEVICE_WIDTH,
         h: seekButtonsHeight,
-        normal_src: "skip_previous.png",
-        press_src: "skip_previous_pressed.png",
+        normal_color: 0x000000,
+        press_color: BUTTON_COLOR_PRESSED,
         click_func: () => {
           this.doMediaAction("previous_track");
         },
       });
+      let prev_img = this.createWidget(hmUI.widget.IMG, {
+        x: DEVICE_WIDTH / 2 - seekImgSize / 2,
+        y: (seekButtonsHeight - seekImgSize) / 2,
+        w: seekImgSize,
+        h: seekImgSize,
+        src: "skip_previous.png"
+      })
+      prev_img.setEnable(false)
     }
 
     this.state.y = 60 + 10;
@@ -343,12 +353,20 @@ class Index extends AppPage {
         y: DEVICE_HEIGHT - seekButtonsHeight,
         w: DEVICE_WIDTH,
         h: seekButtonsHeight,
-        normal_src: "skip_next.png",
-        press_src: "skip_next_pressed.png",
+        normal_color: 0x000000,
+        press_color: BUTTON_COLOR_PRESSED,
         click_func: () => {
           this.doMediaAction("next_track");
-        },
+        }
       });
+      let next_img = this.createWidget(hmUI.widget.IMG, {
+        x: DEVICE_WIDTH / 2 - seekImgSize / 2,
+        y: DEVICE_HEIGHT - seekButtonsHeight + (seekButtonsHeight - seekImgSize) / 2,
+        w: seekImgSize,
+        h: seekImgSize,
+        src: "skip_next.png"
+      })
+      next_img.setEnable(false)
     }
 
     this.updateElementsData();

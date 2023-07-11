@@ -1,4 +1,4 @@
-import { DEVICE_HEIGHT, DEVICE_WIDTH, TOP_BOTTOM_OFFSET, BUTTON_COLOR_NORMAL, BUTTON_COLOR_PRESSED } from "../home/index.style";
+import { DEVICE_HEIGHT, DEVICE_WIDTH, TOP_BOTTOM_OFFSET, BUTTON_COLOR_NORMAL, ACCENT_COLOR } from "../home/index.style";
 import Modal from "./Modal";
 /**
  * @param {object} props {
@@ -63,8 +63,8 @@ class NativeSliderModal extends Modal {
             y: POS_Y + this.height + 20,
             w: BUTTON_SIZE,
             h: BUTTON_SIZE,
-            normal_color: this.buttonState ? BUTTON_COLOR_PRESSED : BUTTON_COLOR_NORMAL,
-            press_color: this.buttonState ? BUTTON_COLOR_PRESSED : BUTTON_COLOR_NORMAL,
+            normal_color: this.buttonState ? ACCENT_COLOR : BUTTON_COLOR_NORMAL,
+            press_color: this.buttonState ? ACCENT_COLOR : BUTTON_COLOR_NORMAL,
         })
 
         if (fromUserInput)

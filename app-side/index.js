@@ -90,11 +90,9 @@ async function getEnabledSensors() {
 }
 
 async function getSensorLog(entity_id) {
-  console.log("getSensorLog", entity_id)
   const { body } = await request(`/api/history/period?minimal_response&no_attributes&significant_changes_only&filter_entity_id=${entity_id}`);
   const log = typeof body === "string" ? JSON.parse(body)[0] : body[0];
   let shortLog = log.map(e => e.state).slice(-15)
-  console.log(shortLog)
   return shortLog
 }
 

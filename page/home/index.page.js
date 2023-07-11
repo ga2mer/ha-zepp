@@ -60,7 +60,7 @@ class Index extends AppPage {
       })
       .catch((res) => {
         this.drawError();
-        console.log(res);
+        logger.log(res);
       });
   }
   toggleSwitchable(item, value) {
@@ -190,7 +190,7 @@ class Index extends AppPage {
   }
   onBack(props) {
     if (props.path === 'test_page') {
-      console.log(JSON.stringify(props));
+      logger.log(JSON.stringify(props));
     }
   }
   onDestroy() {
