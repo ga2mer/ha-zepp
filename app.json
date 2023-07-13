@@ -62,6 +62,43 @@
         }
       ],
       "designWidth": 194
+    },
+    "gts3": {
+      "module": {
+        "page": {
+          "pages": [
+            "page/home/index.page",
+            "page/light/index.page",
+            "page/light/effectPicker.page",
+            "page/media_player/index.page",
+            "page/test_page/index.page"
+          ],
+          "window": {
+            "navigationBarBackgroundColor": "#ffffff",
+            "navigationBarTextStyle": "black",
+            "navigationBarTitleText": "Home Assistant",
+            "backgroundColor": "#eeeeee",
+            "backgroundTextStyle": "light"
+          }
+        },
+        "app-side": {
+          "path": "app-side/index"
+        },
+        "setting": {
+          "path": "setting/index"
+        }
+      },
+      "platforms": [
+        {
+          "name": "gts-3",
+          "deviceSource": 224
+        },
+        {
+          "name": "gts-3-w",
+          "deviceSource": 225
+        }
+      ],
+      "designWidth": 90
     }
   },
   "i18n": {
