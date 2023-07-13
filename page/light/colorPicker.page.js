@@ -6,6 +6,9 @@ import {
   DEVICE_WIDTH,
   TOP_BOTTOM_OFFSET,
 } from "../home/index.style";
+
+import { gettext } from 'i18n'
+
 const { messageBuilder } = getApp()._options.globalData;
 const logger = DeviceRuntimeCore.HmLogger.getLogger("ha-zepp-light-colorPicker");
 
@@ -29,7 +32,7 @@ class ColorPicker extends AppPage {
     this.clearWidgets();
 
     if (typeof this.state.item !== "object") {
-      this.drawError("Wrong sensor data " + typeof this.state.item);
+      this.drawError(gettext("wrongsendata") + typeof this.state.item);
       return;
     }
 
@@ -55,7 +58,7 @@ class ColorPicker extends AppPage {
         y: this.state.y,
         w: DEVICE_WIDTH / 3,
         h: titleHeight,
-        text: "Color:",
+        text: gettext("color"),
         text_size: 17,
         color: 0xffffff,
         align_h: hmUI.align.LEFT,

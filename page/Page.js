@@ -2,6 +2,7 @@ const TOP_BOTTOM_OFFSET = 46;
 
 const { width: DEVICE_WIDTH, height: DEVICE_HEIGHT } = hmSetting.getDeviceInfo();
 
+import { gettext } from 'i18n'
 
 class AppPage {
   constructor(app, id, params) {
@@ -93,18 +94,18 @@ class AppPage {
   }
 
   drawNoBLEConnect() {
-    return this.drawTextMessage("No connection to\n the application");
+    return this.drawTextMessage(gettext("noconn"));
   }
 
   drawWait(message = null) {
-    let text = 'Loading...'
+    let text = gettext("loading")
     if (message)
       text += "\n" + message
     return this.drawTextMessage(text);
   }
 
   drawError(message) {
-    let text = "An error occurred";
+    let text = gettext("erroccured");
     if (typeof message === 'string') {
       text += ':\n';
       text += message;

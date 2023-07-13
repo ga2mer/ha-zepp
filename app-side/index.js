@@ -89,6 +89,13 @@ async function getEnabledSensors() {
   return enabledSensors;
 }
 
+async function getServerInfo()
+{
+  const { body } = await request("/api/config");
+  const info = typeof body === "string" ? JSON.parse(body) : body;
+  return info
+}
+
 async function getSensorLog(entity_id) {
   const { body } = await request(`/api/history/period?minimal_response&no_attributes&significant_changes_only&filter_entity_id=${entity_id}`);
   const log = typeof body === "string" ? JSON.parse(body)[0] : body[0];
@@ -266,6 +273,15 @@ AppSideService({
         try {
           const sensorLog = await getSensorLog(payload.entity_id);
           ctx.response({ data: { result: sensorLog } });
+        } catch (e) {
+          ctx.response({ data: { error: e.message } });
+        }
+      }
+
+      if (payload.method === "GET_SERVER_INFO") {
+        try {
+          const info = await getServerInfo();
+          ctx.response({ data: { result: info } });
         } catch (e) {
           ctx.response({ data: { error: e.message } });
         }

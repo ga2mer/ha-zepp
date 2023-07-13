@@ -1,6 +1,6 @@
 import AppPage from '../Page';
 
-import { DEVICE_HEIGHT, DEVICE_WIDTH, TOP_BOTTOM_OFFSET } from "./index.style";
+import { BUTTON_COLOR_NORMAL, BUTTON_COLOR_PRESSED, DEVICE_HEIGHT, DEVICE_WIDTH, TOP_BOTTOM_OFFSET } from "./index.style";
 
 const { messageBuilder } = getApp()._options.globalData;
 
@@ -159,7 +159,7 @@ class Index extends AppPage {
   }
   createElement(item) {
     if (item === "end") {
-      return this.createWidget(hmUI.widget.BUTTON, {
+      let elem = this.createWidget(hmUI.widget.BUTTON, {
         x: 0,
         y: this.state.y,
         w: DEVICE_WIDTH,
@@ -169,6 +169,8 @@ class Index extends AppPage {
           this.router.go('test_page');
         }
       });
+      this.state.y += TOP_BOTTOM_OFFSET + 10
+      return elem
     }
     if (typeof item !== 'object' || typeof item.type !== 'string') return;
     if (
@@ -179,13 +181,44 @@ class Index extends AppPage {
     }
     return this.createSensor(item);
   }
+
+  createInfoButton() {
+    const imgSize = 36
+    const buttonWidth = DEVICE_WIDTH / 4
+    this.createWidget(hmUI.widget.BUTTON, {
+      x: DEVICE_WIDTH / 2 - buttonWidth / 2,
+      y: this.state.y,
+      h: buttonWidth,
+      w: buttonWidth,
+      radius: buttonWidth / 2,
+      normal_color: BUTTON_COLOR_NORMAL,
+      press_color: BUTTON_COLOR_PRESSED,
+      click_func: () => {
+        this.router.go("info_page")
+      }
+    })
+    let img = this.createWidget(hmUI.widget.IMG, {
+      x: (DEVICE_WIDTH / 2 - buttonWidth / 2) + (buttonWidth - imgSize) / 2,
+      y: this.state.y + (buttonWidth - imgSize) / 2,
+      w: imgSize,
+      h: imgSize,
+      src: "info.png"
+    })
+    img.setEnable(false)
+    this.state.y += buttonWidth + 10
+  }
+
   createAndUpdateList(showEmpty = true) {
     this.clearWidgets();
     this.state.rendered = false;
     this.state.dataList.forEach((item) => {
       this.createElement(item);
     });
+    this.state.y += 10
+    this.createInfoButton()
+
     this.createElement("end");
+
     this.state.rendered = true;
   }
   onBack(props) {

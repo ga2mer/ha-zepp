@@ -1,3 +1,5 @@
+import { gettext } from 'i18n';
+
 AppSettingsPage({
   state: {
     sensorsList: [],
@@ -63,7 +65,7 @@ AppSettingsPage({
     for (const key in grouped) {
       let sensorGroup = [];
 
-      let keytext = key.charAt(0).toUpperCase() + key.slice(1).replace("_", " ")
+      let keytext = gettext(key)
       sensorGroup.push(
         Text(
           {
@@ -77,18 +79,24 @@ AppSettingsPage({
           View(
             {
               style: {
-                borderBottom: "1px solid #eaeaea",
+                borderBottom: "1px solid #cdcdcd",
                 padding: "6px 0",
                 marginBottom: "6px",
-                display: "flex",
-                flexDirection: "row",
               },
             },
-            Toggle({
-              label: `${item.title} (${item.key})`,
-              value: item.value,
-              onChange: this.toggleSensor.bind(this, item.key),
-            }),
+            [
+              Toggle({
+                label: item.title,
+                value: item.value,
+                onChange: this.toggleSensor.bind(this, item.key),
+              }),
+              Text({
+                style: {
+                  fontSize: "12px"
+                }
+              },
+                item.key.split(".")[1])
+            ]
           )
         )
       })
@@ -107,21 +115,21 @@ AppSettingsPage({
 
     return Section({}, [
       TextInput({
-        label: 'Local HA instance address:',
+        label: gettext('localhaaddr'),
         settingsKey: "localHAIP",
         subStyle: textInputStyle,
         labelStyle,
         placeholder: 'http://192.168.0.13:8123',
       }),
       TextInput({
-        label: "External HA instance address:",
+        label: gettext('exthaaddr'),
         settingsKey: "externalHAIP",
         subStyle: textInputStyle,
         labelStyle,
         placeholder: 'https://your-ha-instance.com',
       }),
       TextInput({
-        label: "Long-lived access token:",
+        label: gettext("llatoken"),
         settingsKey: "HAToken",
         subStyle: textInputStyle,
         labelStyle,
@@ -133,7 +141,7 @@ AppSettingsPage({
           style: {
             margin: "10px"
           },
-          label: "Refresh sensors",
+          label: gettext("sensrefresh"),
           async onClick() {
             props.settingsStorage.removeItem("sensorsList");
             props.settingsStorage.setItem("listFetchRandom", Math.random());
@@ -144,7 +152,7 @@ AppSettingsPage({
       Text({
         style: labelStyle
       },
-        "Only media players, light, switches and sensors are supported for now:"),
+        gettext("supportedentities")),
       sensorsList.length > 0 &&
       View(
         {

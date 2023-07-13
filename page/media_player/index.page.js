@@ -112,13 +112,13 @@ class Index extends AppPage {
     if (action.includes("_track")) {
       this.getSensorInfo(1000);
     } else {
-      if (this.positionArc) this.setArcUpdateTimer(action === "play");
+      if (this.state.positionArc) this.setArcUpdateTimer(action === "play");
       this.state.isPlaying = action === "play";
     }
   }
   setArcPosition(floatvalue) {
     this.state.positionArc.setProperty(hmUI.prop.MORE, {
-      end_angle: Math.min(270, Math.round(floatvalue * 360) - 90),
+      end_angle: Math.min(270, Math.floor(floatvalue * 360) - 90),
     });
   }
   updateElementsData() {
@@ -165,7 +165,7 @@ class Index extends AppPage {
       return;
     }
 
-    const seekButtonsHeight = 60;
+    const seekButtonsHeight = 70;
     const seekImgSize = 48;
 
     if (this.state.item.attributes.supported_features & 16) {
@@ -191,7 +191,7 @@ class Index extends AppPage {
       prev_img.setEnable(false)
     }
 
-    this.state.y = 60 + 10;
+    this.state.y = seekButtonsHeight + 10;
 
     const titleHeight = 40;
     const valueHeight = 48;
@@ -208,8 +208,31 @@ class Index extends AppPage {
     });
     this.state.y += titleHeight + 20;
 
+    if (this.state.item.attributes.supported_features & 1) {
+      //PAUSE  https://github.com/home-assistant/core/blob/e9705364a80fff9c18e2e24b0c0dceff0a71df6e/homeassistant/components/media_player/const.py#L179
+      this.createWidget(hmUI.widget.BUTTON,
+        {
+          x: DEVICE_WIDTH / 2 - DEVICE_WIDTH / 4,
+          y: this.state.y,
+          w: DEVICE_WIDTH / 2,
+          h: DEVICE_WIDTH / 2,
+          radius: DEVICE_WIDTH / 4,
+          press_color: BUTTON_COLOR_PRESSED,
+          normal_color: 0x000000,
+          click_func: () => {
+            if (this.state.rendered) {
+              this.doMediaAction(this.state.isPlaying ? "pause" : "play");
+            }
+
+            this.state.playButton.setProperty(hmUI.prop.MORE, {
+              src: (this.state.isPlaying ? "pause" : "play") + ".png",
+            });
+          }
+        })
+    }
+
     if (this.state.item.attributes.media_duration && this.state.item.attributes.media_position) {
-      this.createWidget(hmUI.widget.ARC, {
+      let bottomarc = this.createWidget(hmUI.widget.ARC, {
         x: DEVICE_WIDTH / 2 - DEVICE_WIDTH / 4,
         y: this.state.y,
         w: DEVICE_WIDTH / 2,
@@ -219,6 +242,8 @@ class Index extends AppPage {
         color: 0x262626,
         line_width: 7,
       });
+
+      bottomarc.setEnable(false)
 
       this.state.positionArc = this.createWidget(hmUI.widget.ARC, {
         x: DEVICE_WIDTH / 2 - DEVICE_WIDTH / 4,
@@ -230,27 +255,19 @@ class Index extends AppPage {
         color: 0xffffff,
         line_width: 7,
       });
+      this.state.positionArc.setEnable(false)
     }
 
     const playIconSize = 48;
+
     this.state.playButton = this.createWidget(hmUI.widget.IMG, {
       x: DEVICE_WIDTH / 2 - playIconSize / 2,
       y: this.state.y + DEVICE_WIDTH / 4 - playIconSize / 2,
+      w: playIconSize,
+      h: playIconSize,
       src: "play.png",
     });
-
-    if (this.state.item.attributes.supported_features & 1) {
-      //PAUSE  https://github.com/home-assistant/core/blob/e9705364a80fff9c18e2e24b0c0dceff0a71df6e/homeassistant/components/media_player/const.py#L179
-      this.state.playButton.addEventListener(hmUI.event.CLICK_UP, (info) => {
-        if (this.state.rendered) {
-          this.doMediaAction(this.state.isPlaying ? "pause" : "play");
-        }
-
-        this.state.playButton.setProperty(hmUI.prop.MORE, {
-          src: (this.state.isPlaying ? "pause" : "play") + ".png",
-        });
-      });
-    }
+    this.state.playButton.setEnable(false)
 
     this.state.y += DEVICE_WIDTH / 2 + 30;
 

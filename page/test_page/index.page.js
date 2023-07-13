@@ -6,6 +6,8 @@ import BetterDialogModal from "../modal/BetterDialogModal";
 const { messageBuilder } = getApp()._options.globalData;
 const logger = DeviceRuntimeCore.HmLogger.getLogger("ha-zepp-testpage");
 
+import { gettext } from 'i18n'
+
 class Index extends AppPage {
   constructor(...props) {
     super(...props);
@@ -23,7 +25,7 @@ class Index extends AppPage {
       y: this.state.y,
       w: (DEVICE_WIDTH / 3) * 2,
       h: titleHeight,
-      text: "Value",
+      text: gettext("value"),
       text_size: 17,
       color: 0xffffff,
       align_h: hmUI.align.LEFT,
@@ -111,8 +113,8 @@ class Index extends AppPage {
     this.addWidget(buttonSlider.components);
 
     this.dialogModal = new BetterDialogModal(this.app,
-      "Very very very very long title",
-      "The quick brown fox jumps over the lazy dog\nThe quick brown fox jumps over the lazy dog\nLorem imsum blah blah blah",
+      gettext("testpangramm"),
+      `${gettext("testpangramm")}\n${gettext("testpangramm")}\n${gettext("testpangramm")}`,
       ["close_img.png", "pig_img.png", "ok_img.png"],
       (buttonIndex) => {logger.log("modal click button " + buttonIndex)})
 

@@ -7,6 +7,9 @@ import TestPage from './test_page/index.page';
 import PageNotFound from './PageNotFound';
 import ColorPicker from './light/colorPicker.page';
 import SensorPage from './sensor/index.page';
+import InfoPage from './info_page/index.page'
+
+import { gettext } from 'i18n'
 
 class Router {
   constructor(app) {
@@ -19,6 +22,7 @@ class Router {
       'media_player': MediaPlayer,
       'sensor': SensorPage,
       'test_page': TestPage,
+      'info_page': InfoPage,
     };
     this.pageId = 0;
     this.history = [];
@@ -96,7 +100,7 @@ class Router {
     } catch (e) {
       console.log(e.message);
       hmUI.showToast({
-        text: 'Crash'
+        text: gettext("crash")
       })
     }
   }

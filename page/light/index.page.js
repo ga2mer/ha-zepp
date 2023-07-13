@@ -7,6 +7,8 @@ import { rgbColorPack, shadeRGBColor } from '../../utils';
 const { messageBuilder } = getApp()._options.globalData;
 const logger = DeviceRuntimeCore.HmLogger.getLogger("ha-zepp-light");
 
+import { gettext } from 'i18n'
+
 class Index extends AppPage {
     constructor(...props) {
         super(...props);
@@ -40,7 +42,7 @@ class Index extends AppPage {
             y: this.state.y,
             w: DEVICE_WIDTH / 3 * 2,
             h: titleHeight,
-            text: "Brightness:",
+            text: gettext("brightness"),
             text_size: 17,
             color: 0xffffff,
             align_h: hmUI.align.LEFT,
@@ -113,7 +115,7 @@ class Index extends AppPage {
             y: this.state.y,
             w: DEVICE_WIDTH / 3,
             h: titleHeight,
-            text: "Color:",
+            text: gettext("color"),
             text_size: 17,
             color: 0xffffff,
             align_h: hmUI.align.LEFT,
@@ -139,7 +141,7 @@ class Index extends AppPage {
         this.clearWidgets()
 
         if (typeof this.state.item !== 'object') {
-            this.drawError("Wrong sensor data " + typeof this.state.item)
+            this.drawError(gettext("wrongsendata") + typeof this.state.item)
             return;
         }
 
@@ -203,7 +205,7 @@ class Index extends AppPage {
                 y: this.state.y,
                 w: DEVICE_WIDTH / 3,
                 h: 32,
-                text: "Effect:",
+                text: gettext("effect"),
                 text_size: 17,
                 color: 0xffffff,
                 align_h: hmUI.align.LEFT,

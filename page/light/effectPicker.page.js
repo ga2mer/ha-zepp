@@ -10,6 +10,8 @@ const logger = DeviceRuntimeCore.HmLogger.getLogger(
   "ha-zepp-light-effectPicker"
 );
 
+import { gettext } from 'i18n'
+
 class EffectPicker extends AppPage {
   constructor(...props) {
     super(...props);
@@ -25,7 +27,7 @@ class EffectPicker extends AppPage {
     this.clearWidgets();
 
     if (typeof this.state.item !== "object") {
-      this.drawError("Wrong sensor data " + typeof this.state.item);
+      this.drawError(gettext("wrongsendata") + typeof this.state.item);
       return;
     }
 
@@ -49,7 +51,7 @@ class EffectPicker extends AppPage {
         y: this.state.y,
         w: DEVICE_WIDTH / 3,
         h: 32,
-        text: "Effect:",
+        text: gettext("effect"),
         text_size: 17,
         color: 0xffffff,
         align_h: hmUI.align.LEFT,

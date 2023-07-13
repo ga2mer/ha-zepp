@@ -1,9 +1,11 @@
 import { getEveryNth } from "../../utils";
 import AppPage from "../Page";
-import { BUTTON_COLOR_PRESSED, DEVICE_HEIGHT, DEVICE_WIDTH, TOP_BOTTOM_OFFSET } from "../home/index.style";
+import { ACCENT_COLOR, BUTTON_COLOR_PRESSED, DEVICE_HEIGHT, DEVICE_WIDTH, TOP_BOTTOM_OFFSET } from "../home/index.style";
 
 const logger = DeviceRuntimeCore.HmLogger.getLogger("ha-zepp-sensor");
 const { messageBuilder } = getApp()._options.globalData;
+
+import { gettext } from 'i18n'
 
 class SensorPage extends AppPage {
     constructor(...props) {
@@ -20,13 +22,13 @@ class SensorPage extends AppPage {
         const YEAR = 365 * DAY;
         const MONTH = YEAR / 12;
         const units = [
-            { max: 30 * SECOND, divisor: 1, past1: 'just now', pastN: 'just now' },
-            { max: MINUTE, divisor: SECOND, past1: 'a second ago', pastN: '# seconds ago' },
-            { max: HOUR, divisor: MINUTE, past1: 'a minute ago', pastN: '# minutes ago' },
-            { max: DAY, divisor: HOUR, past1: 'an hour ago', pastN: '# hours ago' },
-            { max: WEEK, divisor: DAY, past1: 'yesterday', pastN: '# days ago' },
-            { max: 4 * WEEK, divisor: WEEK, past1: 'last week', pastN: '# weeks ago' },
-            { max: Infinity, divisor: MONTH, past1: 'long ago', pastN: 'long ago' }
+            { max: 30 * SECOND, divisor: 1, past1: gettext("justnow"), pastN: gettext("justnow") },
+            { max: MINUTE, divisor: SECOND, past1: gettext("secago"), pastN: gettext("nsecago") },
+            { max: HOUR, divisor: MINUTE, past1: gettext("minago"), pastN: gettext("nminago") },
+            { max: DAY, divisor: HOUR, past1: gettext("hourago"), pastN: gettext("nhourago") },
+            { max: WEEK, divisor: DAY, past1: gettext("dayago"), pastN: gettext("ndaysago") },
+            { max: 4 * WEEK, divisor: WEEK, past1: gettext("weekago"), pastN: gettext("nweeksago") },
+            { max: Infinity, divisor: MONTH, past1: gettext("longago"), pastN: gettext("longago") }
         ];
         const diff = Date.now() - date;
         const diffAbs = Math.abs(diff);
@@ -120,7 +122,7 @@ class SensorPage extends AppPage {
             w: DEVICE_WIDTH / 2,
             color: 0xffffff,
             text_size: 19,
-            text: "Updated:"
+            text: gettext("updated")
         })
 
         this.createWidget(hmUI.widget.TEXT, {
@@ -142,7 +144,7 @@ class SensorPage extends AppPage {
             w: DEVICE_WIDTH - 20,
             color: 0xffffff,
             text_size: 17,
-            text: "Sensor history:"
+            text: gettext("senshist")
         })
         this.state.y += 24 + 5
 
@@ -164,7 +166,7 @@ class SensorPage extends AppPage {
                 w: DEVICE_WIDTH - 20,
                 color: 0xffffff,
                 text_size: 17,
-                text: log == null ? "error while loading history" : "history is too short"
+                text: log == null ? gettext("histloaderr") : gettext("histshorterr")
             })
             this.state.y += 24 + 5
         }
@@ -196,7 +198,7 @@ class SensorPage extends AppPage {
                 item_radius: item_width / 2,
                 item_start_y: 20,
                 item_max_height: viewHeight - 20,
-                item_color: BUTTON_COLOR_PRESSED,
+                item_color: ACCENT_COLOR,
                 data_array,
                 data_count: data_array.length,
                 data_min_value: data_min_value - 10,
