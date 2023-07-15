@@ -10,8 +10,7 @@ function getSensorsList() {
 
 async function fetchRequest(url, path, fetchParams = {}) {
   const token = settings.settingsStorage.getItem("HAToken");
-  const res = await fetch({
-    url: new URL(path, url).toString(),
+  const res = await fetch(new URL(path, url).toString(), {
     method: "GET",
     ...fetchParams,
     headers: {
