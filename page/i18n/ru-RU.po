@@ -1,0 +1,111 @@
+msgid "ha"
+msgstr "Home Assistant"
+
+msgid "pagenotfound"
+msgstr "Страница не найдена"
+
+msgid "wrongsendata"
+msgstr "Неверные данные сенсора "
+
+msgid "histloaderr"
+msgstr "ошибка загрузки истории"
+
+msgid "histshorterr"
+msgstr "история слишком короткая"
+
+msgid "crash"
+msgstr "Вылет"
+
+msgid "noconn"
+msgstr "Нет соединения\n с приложением"
+
+msgid "loading"
+msgstr "Загрузка..."
+
+msgid "erroccured"
+msgstr "Возникла ошибка"
+
+msgid "testpangramm"
+msgstr "Съешь же ещё этих мягких французских булок да выпей чаю"
+
+msgid "timezone"
+msgstr "Часовой пояс: "
+
+msgid "value"
+msgstr "Значение"
+
+msgid "safemode"
+msgstr "Безопасный режим: "
+
+msgid "on"
+msgstr "вкл."
+
+msgid "off"
+msgstr "выкл."
+
+msgid "NOT_RUNNING"
+msgstr "Не работает/Перезапускается"
+
+msgid "RUNNING"
+msgstr "Работает"
+
+msgid "version"
+msgstr "Версия: "
+
+msgid "language"
+msgstr "Язык: "
+
+msgid "state"
+msgstr "Состояние: "
+
+msgid "color"
+msgstr "Цвет:"
+
+msgid "effect"
+msgstr "Эффект:"
+
+msgid "brightness"
+msgstr "Яркость:"
+
+msgid "updated"
+msgstr "ОБновлено:"
+
+msgid "senshist"
+msgstr "История:"
+
+msgid "justnow"
+msgid "сейчас"
+
+msgid "secago"
+msgstr "секунду назад"
+
+msgid "nsecago"
+msgstr "# секунд назад"
+
+msgid "minago"
+msgstr "минуту назад"
+
+msgid "nminago"
+msgstr "# минут назад"
+
+msgid "hourago"
+msgstr "час назад"
+
+msgid "nhourago"
+msgstr "# часов назад"
+
+msgid "dayago"
+msgstr "вчера"
+
+msgid "ndaysago"
+msgstr "# дней назад"
+
+msgid "weekago"
+msgstr "на неделе"
+
+msgid "nweeksago"
+msgstr "# недель назад"
+
+msgid "longago"
+msgstr "давно"
+

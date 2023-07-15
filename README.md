@@ -1,13 +1,30 @@
 # Home Assistant companion for Zepp OS devices
 Application that allows you to control a smart home based on the Home Assistant
 
-![image](images/1.png)  ![image](images/2.png) ![image](images/3.png)
-
 ## Features
-- (Binary) Sensor status
+- Sensor status and graph
 - Toggle switch
-- Toggle light, see its effect (if presented), change its brightness (if this possible)
+- Toggle light, change its effect, brightness and color (if this possible)
 - Media player support with play/pause, prev/next, volume control
+
+## Screenshots  
+![image](images/1.png)  
+<details>
+  <summary>Light</summary>
+  <img src="images/3.png">
+  <img src="images/3.1.png">
+  <img src="images/3.2.png">
+  <img src="images/3.3.png">
+</details>
+<details>
+  <summary>Media player</summary>
+  <img src="images/2.png">
+  <img src="images/2.1.png">
+</details>
+<details>
+  <summary>Sensor</summary>
+  <img src="images/4.png">
+</details>
 
 ### To Do:
 - Editing colors for lights
@@ -15,7 +32,8 @@ Application that allows you to control a smart home based on the Home Assistant
 
 ### Devices supported
 - Mi Band 7 (You need modified Zepp app (see preparations))
-- All other Zepp OS devices, but there is no proper UI for them
+- Amazfit Band 7
+- All other Zepp OS (square) devices, but there is no proper UI for them
 
 ### Preparations
 #### Mi Band 7

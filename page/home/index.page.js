@@ -1,6 +1,6 @@
 import AppPage from '../Page';
 
-import { DEVICE_HEIGHT, DEVICE_WIDTH, TOP_BOTTOM_OFFSET } from "./index.style";
+import { BUTTON_COLOR_NORMAL, BUTTON_COLOR_PRESSED, DEVICE_HEIGHT, DEVICE_WIDTH, TOP_BOTTOM_OFFSET } from "./index.style";
 
 const { messageBuilder } = getApp()._options.globalData;
 
@@ -23,7 +23,6 @@ class Index extends AppPage {
     }
   }
   onInit(param) {
-    hmUI.setLayerScrolling(true);
     if (hmBle.connectStatus()) {
       this.setState({
         loading: true,
@@ -37,6 +36,7 @@ class Index extends AppPage {
     messageBuilder.on("call", this.onMessage);
   }
   onRender() {
+    this.app.setLayerScrolling(true);
     if (this.state.loading) {
       this.drawWait();
     } else if (this.state.error) {
@@ -60,7 +60,7 @@ class Index extends AppPage {
       })
       .catch((res) => {
         this.drawError();
-        console.log(res);
+        logger.log(res);
       });
   }
   toggleSwitchable(item, value) {
@@ -81,18 +81,19 @@ class Index extends AppPage {
       color: 0xaaaaaa,
       align_h: hmUI.align.CENTER_H,
     });
+
     this.createWidget(hmUI.widget.TEXT, {
       x: 0,
       y: this.state.y + titleHeight,
       w: DEVICE_WIDTH,
       h: valueHeight,
-      text: item.state,
+      text: item.state + (item.unit || ""),
       text_size: 16,
       color: 0xffffff,
       align_h: hmUI.align.CENTER_H,
     });
 
-    if (item.type === "light" || item.type === "media_player") {
+    if ((item.type === "light" || item.type === "media_player" || (item.type === "sensor" && !isNaN(item.state))) && item.state != "unavailable") {
       const iconsize = 24
       this.createWidget(hmUI.widget.BUTTON, {
         x: DEVICE_WIDTH - iconsize - 5,
@@ -158,17 +159,18 @@ class Index extends AppPage {
   }
   createElement(item) {
     if (item === "end") {
-      return this.createWidget(hmUI.widget.BUTTON, {
+      let elem = this.createWidget(hmUI.widget.BUTTON, {
         x: 0,
         y: this.state.y,
         w: DEVICE_WIDTH,
         h: TOP_BOTTOM_OFFSET,
-        text: "",
         text: "   ",
         click_func: () => {
           this.router.go('test_page');
         }
       });
+      this.state.y += TOP_BOTTOM_OFFSET + 10
+      return elem
     }
     if (typeof item !== 'object' || typeof item.type !== 'string') return;
     if (
@@ -179,18 +181,49 @@ class Index extends AppPage {
     }
     return this.createSensor(item);
   }
+
+  createInfoButton() {
+    const imgSize = 36
+    const buttonWidth = DEVICE_WIDTH / 4
+    this.createWidget(hmUI.widget.BUTTON, {
+      x: DEVICE_WIDTH / 2 - buttonWidth / 2,
+      y: this.state.y,
+      h: buttonWidth,
+      w: buttonWidth,
+      radius: buttonWidth / 2,
+      normal_color: BUTTON_COLOR_NORMAL,
+      press_color: BUTTON_COLOR_PRESSED,
+      click_func: () => {
+        this.router.go("info_page")
+      }
+    })
+    let img = this.createWidget(hmUI.widget.IMG, {
+      x: (DEVICE_WIDTH / 2 - buttonWidth / 2) + (buttonWidth - imgSize) / 2,
+      y: this.state.y + (buttonWidth - imgSize) / 2,
+      w: imgSize,
+      h: imgSize,
+      src: "info.png"
+    })
+    img.setEnable(false)
+    this.state.y += buttonWidth + 10
+  }
+
   createAndUpdateList(showEmpty = true) {
     this.clearWidgets();
     this.state.rendered = false;
     this.state.dataList.forEach((item) => {
       this.createElement(item);
     });
+    this.state.y += 10
+    this.createInfoButton()
+
     this.createElement("end");
+
     this.state.rendered = true;
   }
   onBack(props) {
     if (props.path === 'test_page') {
-      console.log(JSON.stringify(props));
+      logger.log(JSON.stringify(props));
     }
   }
   onDestroy() {

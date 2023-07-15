@@ -1,3 +1,5 @@
+import { gettext } from 'i18n';
+
 AppSettingsPage({
   state: {
     sensorsList: [],
@@ -19,9 +21,9 @@ AppSettingsPage({
     this.state.props.settingsStorage.setItem("sensorsList", newStr);
   },
   clearSensors() {
-		this.state.sensorsList = [];
-		this.setItem();
-	},
+    this.state.sensorsList = [];
+    this.setItem();
+  },
   toggleSensor(key, val) {
     const newSensorList = this.state.sensorsList.map((_item) => {
       const item = _item;
@@ -36,7 +38,7 @@ AppSettingsPage({
   build(props) {
     this.setState(props);
     const textInputStyle = {
-      marginTop: "4px",
+      margin: "5px 10px",
       color: "#000000",
       fontSize: "15px",
       borderStyle: "solid",
@@ -46,52 +48,100 @@ AppSettingsPage({
       overflow: "hidden",
       borderWidth: "2px",
     };
+    const labelStyle = {
+      margin: "5px 10px"
+    };
+
     let sensorsList = [];
-    this.state.sensorsList.forEach((item, i) => {
-      if (!item.key.startsWith('light.') && !item.key.startsWith('switch.') && !item.key.startsWith('binary_sensor.') && !item.key.startsWith('sensor.') && !item.key.startsWith('media_player.')) {
-        return;
-      }
-      sensorsList.push(
-        View(
+
+    const supportedTypes = ['light', 'switch', 'binary_sensor', 'sensor', 'media_player']
+    var filteredSensors = this.state.sensorsList.filter((item) => supportedTypes.includes(item.key.split('.')[0]))
+
+    var grouped = filteredSensors.reduce((arr, item) => {
+      arr[item.key.split('.')[0]] = (arr[item.key.split('.')[0]] || []).concat(item);
+      return arr;
+    }, {})
+
+    for (const key in grouped) {
+      let sensorGroup = [];
+
+      let keytext = gettext(key)
+      sensorGroup.push(
+        Text(
           {
-            style: {
-              borderBottom: "1px solid #eaeaea",
-              padding: "6px 0",
-              marginBottom: "6px",
-              display: "flex",
-              flexDirection: "row",
+            align: "center",
+            bold: true
+          }, keytext)
+      )
+
+      grouped[key].forEach((item) => {
+        sensorGroup.push(
+          View(
+            {
+              style: {
+                borderBottom: "1px solid #cdcdcd",
+                padding: "6px 0",
+                marginBottom: "6px",
+              },
             },
-          },
-          Toggle({
-            label: `${item.title} (${item.key})`,
-            value: item.value,
-            onChange: this.toggleSensor.bind(this, item.key),
-          }),
+            [
+              Toggle({
+                label: item.title,
+                value: item.value,
+                onChange: this.toggleSensor.bind(this, item.key),
+              }),
+              Text({
+                style: {
+                  fontSize: "12px"
+                }
+              },
+                item.key.split(".")[1])
+            ]
+          )
         )
-      );
-    });
+      })
+
+      sensorsList.push(View({
+        style: {
+          padding: "10px",
+          marginBottom: "10px",
+          border: "black",
+          borderRadius: "15px",
+          borderWidth: "1px",
+          borderStyle: "solid"
+        }
+      }, sensorGroup))
+    }
+
     return Section({}, [
       TextInput({
-        label: 'Local HA instance address:',
+        label: gettext('localhaaddr'),
         settingsKey: "localHAIP",
         subStyle: textInputStyle,
+        labelStyle,
         placeholder: 'http://192.168.0.13:8123',
       }),
       TextInput({
-        label: "External HA instance address:",
+        label: gettext('exthaaddr'),
         settingsKey: "externalHAIP",
         subStyle: textInputStyle,
+        labelStyle,
         placeholder: 'https://your-ha-instance.com',
       }),
       TextInput({
-        label: "Long-lived access token:",
+        label: gettext("llatoken"),
         settingsKey: "HAToken",
         subStyle: textInputStyle,
+        labelStyle,
       }),
+
       Section(
         {},
         Button({
-          label: "Refresh sensors",
+          style: {
+            margin: "10px"
+          },
+          label: gettext("sensrefresh"),
           async onClick() {
             props.settingsStorage.removeItem("sensorsList");
             props.settingsStorage.setItem("listFetchRandom", Math.random());
@@ -99,20 +149,23 @@ AppSettingsPage({
           },
         })
       ),
-      Text({}, "Only media players, light, switches and (binary) sensors are supported for now:"),
+      Text({
+        style: labelStyle
+      },
+        gettext("supportedentities")),
       sensorsList.length > 0 &&
-        View(
-          {
-            style: {
-              marginTop: "12px",
-              padding: "10px",
-              border: "1px solid #eaeaea",
-              borderRadius: "6px",
-              backgroundColor: "white",
-            },
+      View(
+        {
+          style: {
+            marginTop: "12px",
+            padding: "10px",
+            border: "1px solid #eaeaea",
+            borderRadius: "6px",
+            backgroundColor: "white",
           },
-          sensorsList
-        ),
+        },
+        sensorsList
+      ),
     ]);
   },
 });

@@ -1,8 +1,10 @@
 import AppPage from './Page';
 
+import { gettext } from 'i18n';
+
 class PageNotFound extends AppPage {
   onInit() {
-    this.drawTextMessage('Page not found');
+    this.drawTextMessage(gettext("pagenotfound"));
   }
 }
 

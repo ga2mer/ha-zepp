@@ -63,6 +63,9 @@
   "i18n": {
     "en-US": {
       "appName": "Home Assistant"
+    },
+    "ru-RU": {
+      "appName": "Умный дом"
     }
   },
   "defaultLanguage": "en-US"

@@ -1,0 +1,111 @@
+msgid "ha"
+msgstr "Home Assistant"
+
+msgid "pagenotfound"
+msgstr "Page not found"
+
+msgid "wrongsendata"
+msgstr "Wrong sensor data "
+
+msgid "histloaderr"
+msgstr "error while loading history"
+
+msgid "histshorterr"
+msgstr "history is too short"
+
+msgid "crash"
+msgstr "Crash"
+
+msgid "noconn"
+msgstr "No connection to\n the application"
+
+msgid "loading"
+msgstr "Loading..."
+
+msgid "erroccured"
+msgstr "An error occurred"
+
+msgid "testpangramm"
+msgstr "The quick brown fox jumps over the lazy dog"
+
+msgid "timezone"
+msgstr "Time zone: "
+
+msgid "value"
+msgstr "Value"
+
+msgid "safemode"
+msgstr "Safe mode: "
+
+msgid "on"
+msgstr "on"
+
+msgid "off"
+msgstr "off"
+
+msgid "NOT_RUNNING"
+msgstr "Not running/Restarting"
+
+msgid "RUNNING"
+msgstr "Running"
+
+msgid "version"
+msgstr "Version: "
+
+msgid "language"
+msgstr "Language: "
+
+msgid "state"
+msgstr "State: "
+
+msgid "color"
+msgstr "Color:"
+
+msgid "effect"
+msgstr "Effect:"
+
+msgid "brightness"
+msgstr "Brightness:"
+
+msgid "updated"
+msgstr "Updated:"
+
+msgid "senshist"
+msgstr "Sensor history:"
+
+msgid "justnow"
+msgstr "just now"
+
+msgid "secago"
+msgstr "a second ago"
+
+msgid "nsecago"
+msgstr "# seconds ago"
+
+msgid "minago"
+msgstr "a minute ago"
+
+msgid "nminago"
+msgstr "# minutes ago"
+
+msgid "hourago"
+msgstr "an hour ago"
+
+msgid "nhourago"
+msgstr "# hours ago"
+
+msgid "dayago"
+msgstr "yesterday"
+
+msgid "ndaysago"
+msgstr "# days ago"
+
+msgid "weekago"
+msgstr "last week"
+
+msgid "nweeksago"
+msgstr "# weeks ago"
+
+msgid "longago"
+msgstr "long ago"
+

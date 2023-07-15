@@ -51,6 +51,10 @@ async function request(path, fetchParams) {
   throw new Error('Connection error');
 }
 
+function roundToTwo(num) {
+  return +(Math.round(num + "e+2") + "e-2");
+}
+
 async function getEnabledSensors() {
   const { body } = await request("/api/states");
   const sensors = typeof body === "string" ? JSON.parse(body) : body;
@@ -59,93 +63,118 @@ async function getEnabledSensors() {
     .map((item) => {
       const actualSensor = sensors.find((it) => it.entity_id === item.key);
       if (!actualSensor) return null;
-      let title = actualSensor.entity_id;
-      let state = actualSensor.state;
-      if (actualSensor.attributes) {
-        if (typeof actualSensor.attributes.friendly_name === "string") {
-          title = actualSensor.attributes.friendly_name;
-        }
-        if (typeof actualSensor.attributes.unit_of_measurement === "string") {
-          state += actualSensor.attributes.unit_of_measurement;
-        }
-      }
-      return {
+
+      let sensor = {
         key: actualSensor.entity_id,
-        title,
-        state,
+        title: actualSensor.entity_id,
+        state: actualSensor.state,
         type: actualSensor.entity_id.split(".")[0]
       };
+
+      if (!isNaN(sensor.state)) {
+        sensor.state = roundToTwo(sensor.state).toString()
+      }
+
+      if (actualSensor.attributes) {
+        if (typeof actualSensor.attributes.friendly_name === "string") {
+          sensor.title = actualSensor.attributes.friendly_name;
+        }
+        if (typeof actualSensor.attributes.unit_of_measurement === "string") {
+          sensor.unit = actualSensor.attributes.unit_of_measurement;
+        }
+      }
+      return sensor;
     })
     .filter((item) => item);
   return enabledSensors;
 }
 
+async function getServerInfo()
+{
+  const { body } = await request("/api/config");
+  const info = typeof body === "string" ? JSON.parse(body) : body;
+  return info
+}
+
+async function getSensorLog(entity_id) {
+  const { body } = await request(`/api/history/period?minimal_response&no_attributes&significant_changes_only&filter_entity_id=${entity_id}`);
+  const log = typeof body === "string" ? JSON.parse(body)[0] : body[0];
+  let shortLog = log.map(e => e.state).slice(-15)
+  return shortLog
+}
+
 async function getSensorState(entity_id) {
   const { body } = await request(`/api/states/${entity_id}`);
-  const sensor = typeof body === "string" ? JSON.parse(body) : body;
-  if (!sensor) return null;
+  const actualSensor = typeof body === "string" ? JSON.parse(body) : body;
+  if (!actualSensor) return null;
 
-  let title = sensor.entity_id;
-  let state = sensor.state;
-  if (sensor.attributes) {
-    if (typeof sensor.attributes.friendly_name === "string") {
-      title = sensor.attributes.friendly_name;
-    }
-    if (typeof sensor.attributes.unit_of_measurement === "string") {
-      state += sensor.attributes.unit_of_measurement;
-    }
-  }
-
-  actualSensor = {
-    key: sensor.entity_id,
-    title,
-    state,
-    type: sensor.entity_id.split(".")[0],
+  sensor = {
+    key: actualSensor.entity_id,
+    title: actualSensor.entity_id,
+    state: actualSensor.state,
+    type: actualSensor.entity_id.split(".")[0],
     attributes: {}
   }
 
-  if (actualSensor.type === "light") {
-    if (typeof sensor.attributes.brightness === "number")
-      actualSensor.attributes.brightness = Math.round(sensor.attributes.brightness / 255 * 100)
-
-    if (Array.isArray(sensor.attributes.rgb_color))
-      actualSensor.attributes.rgb_color = sensor.attributes.rgb_color
-
-    if (typeof sensor.attributes.effect === "string")
-      actualSensor.attributes.effect = sensor.attributes.effect
-
-    if (Array.isArray(sensor.attributes.effect_list))
-      actualSensor.attributes.effect_list = sensor.attributes.effect_list
-
-    actualSensor.attributes.supported_features = sensor.attributes.supported_features
+  if (!isNaN(actualSensor.state)) {
+    sensor.state = roundToTwo(sensor.state).toString()
   }
 
-  if (actualSensor.type === "media_player") {
+  if (actualSensor.attributes) {
+    if (typeof actualSensor.attributes.friendly_name === "string") {
+      sensor.title = actualSensor.attributes.friendly_name;
+    }
+    if (typeof actualSensor.attributes.unit_of_measurement === "string") {
+      sensor.unit = actualSensor.attributes.unit_of_measurement;
+    }
+  }
 
-    if (typeof sensor.attributes.volume_level === "number") {
-      if (typeof sensor.attributes.is_volume_muted === "boolean" && sensor.attributes.is_volume_muted)
-        actualSensor.attributes.volume_level = 0
+  if (sensor.type === "sensor") {
+    sensor.attributes.device_class = actualSensor.attributes.device_class
+    sensor.last_changed = actualSensor.last_changed
+  }
 
-      actualSensor.attributes.volume_level = sensor.attributes.volume_level
+  if (sensor.type === "light") {
+    if (typeof actualSensor.attributes.brightness === "number")
+      sensor.attributes.brightness = Math.round(actualSensor.attributes.brightness / 255 * 100)
+
+    if (Array.isArray(actualSensor.attributes.rgb_color))
+      sensor.attributes.rgb_color = actualSensor.attributes.rgb_color
+
+    if (typeof actualSensor.attributes.effect === "string")
+      sensor.attributes.effect = actualSensor.attributes.effect
+
+    if (Array.isArray(actualSensor.attributes.effect_list))
+      sensor.attributes.effect_list = actualSensor.attributes.effect_list
+
+    sensor.attributes.supported_features = actualSensor.attributes.supported_features
+  }
+
+  if (sensor.type === "media_player") {
+
+    if (typeof actualSensor.attributes.is_volume_muted === "boolean")
+      sensor.attributes.is_volume_muted = actualSensor.attributes.is_volume_muted
+
+    if (typeof actualSensor.attributes.volume_level === "number") {
+      sensor.attributes.volume_level = actualSensor.attributes.volume_level
     }
 
-    if (typeof sensor.attributes.media_position === "number")
-      actualSensor.attributes.media_position = sensor.attributes.media_position
+    if (typeof actualSensor.attributes.media_position === "number")
+      sensor.attributes.media_position = actualSensor.attributes.media_position
 
-    if (typeof sensor.attributes.media_duration === "number")
-      actualSensor.attributes.media_duration = sensor.attributes.media_duration
+    if (typeof actualSensor.attributes.media_duration === "number")
+      sensor.attributes.media_duration = actualSensor.attributes.media_duration
 
-    if (typeof sensor.attributes.media_title === "string")
-      actualSensor.attributes.media_title = sensor.attributes.media_title
+    if (typeof actualSensor.attributes.media_title === "string")
+      sensor.attributes.media_title = actualSensor.attributes.media_title
 
-    if (typeof sensor.attributes.media_artist === "string")
-      actualSensor.attributes.media_artist = sensor.attributes.media_artist
+    if (typeof actualSensor.attributes.media_artist === "string")
+      sensor.attributes.media_artist = actualSensor.attributes.media_artist
 
-    actualSensor.attributes.supported_features = sensor.attributes.supported_features
+    sensor.attributes.supported_features = actualSensor.attributes.supported_features
   }
 
-  console.log(actualSensor)
-  return actualSensor
+  return sensor
 }
 
 AppSideService({
@@ -235,6 +264,24 @@ AppSideService({
         try {
           const sensorState = await getSensorState(payload.entity_id);
           ctx.response({ data: { result: sensorState } });
+        } catch (e) {
+          ctx.response({ data: { error: e.message } });
+        }
+      }
+
+      if (payload.method === "GET_SENSOR_LOG") {
+        try {
+          const sensorLog = await getSensorLog(payload.entity_id);
+          ctx.response({ data: { result: sensorLog } });
+        } catch (e) {
+          ctx.response({ data: { error: e.message } });
+        }
+      }
+
+      if (payload.method === "GET_SERVER_INFO") {
+        try {
+          const info = await getServerInfo();
+          ctx.response({ data: { result: info } });
         } catch (e) {
           ctx.response({ data: { error: e.message } });
         }

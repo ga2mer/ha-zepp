@@ -1,0 +1,29 @@
+msgid "localhaaddr"
+msgstr "Адрес Home Assistant в локальной сети:"
+
+msgid "exthaaddr"
+msgstr "Внешний адрес Home Assistant:"
+
+msgid "llatoken"
+msgstr "Долгосрочный токен:"
+
+msgid "sensrefresh"
+msgstr "Обновить сенсоры"
+
+msgid "supportedentities"
+msgstr "Сейчас поддерживаются только медиаустройства, освещение, выключатели и сенсоры:"
+
+msgid "light"
+msgstr "Освещение"
+
+msgid "switch"
+msgstr "Выключатели"
+
+msgid "binary_sensor"
+msgstr "Бинарные сенсоры"
+
+msgid "sensor"
+msgstr "Сенсоры"
+
+msgid "media_player"
+msgstr "Медиаустройства"

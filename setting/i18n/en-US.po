@@ -1,0 +1,29 @@
+msgid "localhaaddr"
+msgstr "Local HA instance address:"
+
+msgid "exthaaddr"
+msgstr "External HA instance address:"
+
+msgid "llatoken"
+msgstr "Long-lived access token:"
+
+msgid "sensrefresh"
+msgstr "Refresh sensors"
+
+msgid "supportedentities"
+msgstr "Only media players, light, switches and sensors are supported for now:"
+
+msgid "light"
+msgstr "Lightening"
+
+msgid "switch"
+msgstr "Switches"
+
+msgid "binary_sensor"
+msgstr "Binary sensors"
+
+msgid "sensor"
+msgstr "Sensors"
+
+msgid "media_player"
+msgstr "Media players"
