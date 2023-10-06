@@ -43,6 +43,7 @@ AppSettingsPage({
       borderColor: "#000000",
       borderRadius: "2px",
       height: "28px",
+      width: "50%",
       overflow: "hidden",
       borderWidth: "2px",
     };

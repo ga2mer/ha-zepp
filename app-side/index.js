@@ -20,6 +20,9 @@ async function fetchRequest(url, path, fetchParams = {}) {
       ...fetchParams.headers,
     },
   });
+  if (res.status != 200) {
+    throw new Error("HTTP response code: " + res.status);
+  }
   return res;
 }
 
@@ -31,7 +34,7 @@ async function request(path, fetchParams) {
   if (!hasLocalIP && !hasExternalIP) {
     throw new Error('No addresses to requests');
   }
-  let error;
+  let error="";
   if (hasLocalIP) {
     try {
       const res = await fetchRequest(localHAIP, path, fetchParams);
@@ -48,7 +51,7 @@ async function request(path, fetchParams) {
       error = e;
     }
   }
-  throw new Error('Connection error');
+  throw new Error('Connection error:\n' + error);
 }
 
 async function getEnabledSensors() {

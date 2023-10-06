@@ -141,7 +141,7 @@ Page({
         y: this.state.y,
         w: DEVICE_WIDTH,
         h: TOP_BOTTOM_OFFSET,
-        text: "   ",
+        text: "TEST",
         click_func: () => {
           hmApp.gotoPage({ file: 'page/test_page/index.page' })
         }
@@ -162,7 +162,7 @@ Page({
     this.state.dataList.forEach((item) => {
       this.createElement(item);
     });
-    this.createElement("end");
+    //this.createElement("end");
     this.state.rendered = true;
   },
   drawTextMessage(message, button) {
@@ -236,6 +236,7 @@ Page({
     }
     logger.debug("page onInit invoked");
     messageBuilder.on("call", this.onAppMessage);
+    hmApp.setScreenKeep(true);
   },
 
   onDestroy() {
