@@ -19,6 +19,7 @@ Page({
         artistText: null,
         positionArc: null,
         playButton: null,
+        powerButton: null,
         nativeslider: null,
         isPlaying: false
     },
@@ -101,12 +102,13 @@ Page({
             });
     },
     setReloadTimer(delay) {
+        const pageUpdatePeriod = 10000
         if (this.state.reloadTimer)
             timer.stopTimer(this.state.reloadTimer)
 
         this.state.reloadTimer = timer.createTimer(
             delay,
-            10000,
+            pageUpdatePeriod,
             function (page) {
                 page.getSensorInfo()
             },
@@ -136,7 +138,7 @@ Page({
         }
     },
     doMediaAction(action) {
-        messageBuilder.request({ method: "MEDIA_ACTION", entity_id: this.state.item.key, value: '{}', service: "media_" + action });
+        messageBuilder.request({ method: "MEDIA_ACTION", entity_id: this.state.item.key, value: '{}', service: action });
 
         if (action.includes("_track")) {
             this.getSensorInfo(1000)
@@ -197,7 +199,7 @@ Page({
                 normal_src: "skip_previous.png",
                 press_src: "skip_previous_pressed.png",
                 click_func: () => {
-                    this.doMediaAction("previous_track")
+                    this.doMediaAction("media_previous_track")
                 }
             })
         }
@@ -244,12 +246,35 @@ Page({
                 color: 0xffffff,
                 line_width: 7
             })
+        }
 
+        let powerToggleSupported = false
+        // Only draw power button if media_player supports TURN_ON and TURN_OFF
+        if (this.state.item.attributes.supported_features & 128 
+            && this.state.item.attributes.supported_features & 256) {
+            powerToggleSupported = true
+            const powerIconHeight = 48
+            const powerIconWidth = 96
+            this.state.powerButton = this.createWidget(hmUI.widget.BUTTON, {
+                x: DEVICE_WIDTH - powerIconWidth,
+                y: this.state.y + DEVICE_WIDTH / 4 - powerIconHeight / 2,
+                w: powerIconWidth,
+                h: powerIconHeight,
+                normal_src: "power.png",
+                press_src: "power_pressed.png",
+                click_func: () => {
+                    this.doMediaAction("toggle")
+                    if(this.state.item.state === "off") {
+                        this.state.rendered = false
+                    }
+                }
+            })
         }
 
         const playIconSize = 48
+        const xLocation = powerToggleSupported ? (DEVICE_WIDTH / 4 - playIconSize / 2) : DEVICE_WIDTH / 2 - playIconSize / 2
         this.state.playButton = this.createWidget(hmUI.widget.IMG, {
-            x: DEVICE_WIDTH / 2 - playIconSize / 2,
+            x: xLocation,
             y: this.state.y + DEVICE_WIDTH / 4 - playIconSize / 2,
             src: 'play.png'
         })
@@ -257,7 +282,7 @@ Page({
         if (this.state.item.attributes.supported_features & 1) { //PAUSE  https://github.com/home-assistant/core/blob/e9705364a80fff9c18e2e24b0c0dceff0a71df6e/homeassistant/components/media_player/const.py#L179
             this.state.playButton.addEventListener(hmUI.event.CLICK_UP, (info) => {
                 if (this.state.rendered) {
-                    this.doMediaAction((this.state.isPlaying ? "pause" : "play"));
+                    this.doMediaAction((this.state.isPlaying ? "media_pause" : "media_play"));
                 }
 
                 this.state.playButton.setProperty(hmUI.prop.MORE, {
@@ -267,7 +292,6 @@ Page({
         }
 
         this.state.y += DEVICE_WIDTH / 2 + 30
-
 
         if (this.state.item.attributes.media_title) {
             this.state.titleText = this.createWidget(hmUI.widget.TEXT, {
@@ -371,7 +395,7 @@ Page({
                 normal_src: "skip_next.png",
                 press_src: "skip_next_pressed.png",
                 click_func: () => {
-                    this.doMediaAction("next_track")
+                    this.doMediaAction("media_next_track")
                 }
             })
         }
@@ -383,7 +407,6 @@ Page({
     },
     onInit(param) {
         logger.log('onInit')
-
         logger.log("param", param)
         this.state.item = JSON.parse(param)
         this.drawWait()
