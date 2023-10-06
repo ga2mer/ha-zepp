@@ -49,7 +49,14 @@ AppSettingsPage({
     };
     let sensorsList = [];
     this.state.sensorsList.forEach((item, i) => {
-      if (!item.key.startsWith('light.') && !item.key.startsWith('switch.') && !item.key.startsWith('binary_sensor.') && !item.key.startsWith('sensor.') && !item.key.startsWith('media_player.')) {
+      if (
+        !item.key.startsWith('light.') && 
+        !item.key.startsWith('switch.') && 
+        !item.key.startsWith('binary_sensor.') && 
+        !item.key.startsWith('sensor.') && 
+        !item.key.startsWith('media_player.') &&
+        !item.key.startsWith('script.')
+      ) {
         return;
       }
       sensorsList.push(

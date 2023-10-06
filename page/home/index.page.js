@@ -134,6 +134,36 @@ Page({
     this.state.y += totalHeight;
 
   },
+  createExecutable(item) {
+    const titleHeight = 32;
+    const valueHeight = 48;
+    const sensorsGap = 10;
+    const totalHeight = titleHeight + valueHeight + sensorsGap;
+    this.createWidget(hmUI.widget.TEXT, {
+      x: 0,
+      y: this.state.y,
+      w: DEVICE_WIDTH,
+      h: titleHeight,
+      text: item.title,
+      text_size: 17,
+      color: 0xaaaaaa,
+      align_h: hmUI.align.CENTER_H,
+    });
+    this.createWidget(hmUI.widget.BUTTON, {
+      x: DEVICE_WIDTH / 4,
+      y: this.state.y + titleHeight,
+      w: DEVICE_WIDTH / 2,
+      h: valueHeight,
+      text: item.state === "on" ? "Cancel" : "Run",
+      normal_color: 0x18BCF2,
+      press_color: 0x61CEF2,
+      radius: 20,
+      click_func: (button) => {
+        messageBuilder.request({ method: "PRESS_BUTTON", entity_id: item.key, service: item.type, current_state: item.state })
+      },
+    });
+    this.state.y += totalHeight;
+  },
   createElement(item) {
     if (item === "end") {
       return this.createWidget(hmUI.widget.BUTTON, {
@@ -153,6 +183,9 @@ Page({
       item.state !== "unavailable"
     ) {
       return this.createSwitchable(item);
+    }
+    if (item.type === "script" && item.state !== "unavailable") {
+      return this.createExecutable(item);
     }
     return this.createSensor(item);
   },

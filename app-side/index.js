@@ -204,6 +204,19 @@ AppSideService({
         });
         ctx.response({ data: { result: [] } });
       }
+      if (payload.method == "PRESS_BUTTON") {
+        let state = "off";
+        if (payload.current_state === "off") {
+          state = "on";
+        }
+        await request(`/api/services/${payload.service}/turn_${state}`, {
+          method: "POST",
+          body: JSON.stringify({
+            entity_id: payload.entity_id,
+          }),
+        });
+        ctx.response({ data: { result: [] }});
+      }
       if (payload.method === "LIGHT_SET") {
         await request(`/api/services/${payload.service}/turn_on`, {
           method: "POST",
