@@ -130,8 +130,8 @@ Page({
       details_button.addEventListener(hmUI.event.CLICK_UP, (info) => {
         hmApp.gotoPage({ file: `page/${item.type}/index.page`, param: JSON.stringify(item) })
       })
-      this.state.y += totalHeight;
     }
+    this.state.y += totalHeight;
 
   },
   createElement(item) {
