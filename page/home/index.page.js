@@ -179,7 +179,7 @@ Page({
     }
     if (typeof item !== 'object' || typeof item.type !== 'string') return;
     if (
-      ["light", "switch"].includes(item.type) &&
+      ["light", "switch", "automation"].includes(item.type) &&
       item.state !== "unavailable"
     ) {
       return this.createSwitchable(item);

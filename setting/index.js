@@ -55,7 +55,8 @@ AppSettingsPage({
         !item.key.startsWith('binary_sensor.') && 
         !item.key.startsWith('sensor.') && 
         !item.key.startsWith('media_player.') &&
-        !item.key.startsWith('script.')
+        !item.key.startsWith('script.') &&
+        !item.key.startsWith('automation.')
       ) {
         return;
       }
