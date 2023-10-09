@@ -17,9 +17,9 @@ Page({
     logger.debug("page build invoked");
     hmUI.setLayerScrolling(true);
   },
-  getSensorsList() {
+  getEntityList() {
     messageBuilder
-      .request({ method: "GET_SENSORS_LIST" })
+      .request({ method: "GET_ENTITY_LIST" })
       .then(({ result, error }) => {
         if (error) {
           this.drawError(error);
@@ -49,11 +49,11 @@ Page({
     this.state.widgets.push(widget);
     return widget;
   },
-  createSensor(item) {
+  createEntity(item) {
     const titleHeight = 32;
     const valueHeight = 32;
-    const sensorsGap = 10;
-    const totalHeight = titleHeight + valueHeight + sensorsGap;
+    const entitiesGap = 10;
+    const totalHeight = titleHeight + valueHeight + entitiesGap;
     this.createWidget(hmUI.widget.TEXT, {
       x: 0,
       y: this.state.y,
@@ -91,8 +91,8 @@ Page({
   createSwitchable(item) {
     const titleHeight = 32;
     const valueHeight = 48;
-    const sensorsGap = 10;
-    const totalHeight = titleHeight + valueHeight + sensorsGap;
+    const entitiesGap = 10;
+    const totalHeight = titleHeight + valueHeight + entitiesGap;
     this.createWidget(hmUI.widget.TEXT, {
       x: 0,
       y: this.state.y,
@@ -134,6 +134,36 @@ Page({
     this.state.y += totalHeight;
 
   },
+  createExecutable(item) {
+    const titleHeight = 32;
+    const valueHeight = 48;
+    const entitiesGap = 10;
+    const totalHeight = titleHeight + valueHeight + entitiesGap;
+    this.createWidget(hmUI.widget.TEXT, {
+      x: 0,
+      y: this.state.y,
+      w: DEVICE_WIDTH,
+      h: titleHeight,
+      text: item.title,
+      text_size: 17,
+      color: 0xaaaaaa,
+      align_h: hmUI.align.CENTER_H,
+    });
+    this.createWidget(hmUI.widget.BUTTON, {
+      x: DEVICE_WIDTH / 4,
+      y: this.state.y + titleHeight,
+      w: DEVICE_WIDTH / 2,
+      h: valueHeight,
+      text: item.state === "on" ? "Cancel" : "Run",
+      normal_color: 0x18BCF2,
+      press_color: 0x61CEF2,
+      radius: 20,
+      click_func: (button) => {
+        messageBuilder.request({ method: "PRESS_BUTTON", entity_id: item.key, service: item.type, current_state: item.state })
+      },
+    });
+    this.state.y += totalHeight;
+  },
   createElement(item) {
     if (item === "end") {
       return this.createWidget(hmUI.widget.BUTTON, {
@@ -141,7 +171,7 @@ Page({
         y: this.state.y,
         w: DEVICE_WIDTH,
         h: TOP_BOTTOM_OFFSET,
-        text: "TEST",
+        //text: "TEST",
         click_func: () => {
           hmApp.gotoPage({ file: 'page/test_page/index.page' })
         }
@@ -149,12 +179,15 @@ Page({
     }
     if (typeof item !== 'object' || typeof item.type !== 'string') return;
     if (
-      ["light", "switch"].includes(item.type) &&
+      ["light", "switch", "automation"].includes(item.type) &&
       item.state !== "unavailable"
     ) {
       return this.createSwitchable(item);
     }
-    return this.createSensor(item);
+    if (item.type === "script" && item.state !== "unavailable") {
+      return this.createExecutable(item);
+    }
+    return this.createEntity(item);
   },
   createAndUpdateList(showEmpty = true) {
     this.clearWidgets();
@@ -162,7 +195,7 @@ Page({
     this.state.dataList.forEach((item) => {
       this.createElement(item);
     });
-    //this.createElement("end");
+    this.createElement("end");
     this.state.rendered = true;
   },
   drawTextMessage(message, button) {
@@ -230,7 +263,7 @@ Page({
   onInit() {
     if (hmBle.connectStatus()) {
       this.drawWait();
-      this.getSensorsList();
+      this.getEntityList();
     } else {
       this.drawNoBLEConnect();
     }

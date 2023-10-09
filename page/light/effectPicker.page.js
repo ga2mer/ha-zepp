@@ -33,7 +33,7 @@ Page({
         this.clearWidgets()
 
         if (typeof this.state.item !== 'object') {
-            this.drawError("Wrong sensor data " + typeof this.state.item)
+            this.drawError("Wrong entity data " + typeof this.state.item)
             return;
         }
 
