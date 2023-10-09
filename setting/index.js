@@ -1,37 +1,43 @@
+import { gettext } from 'i18n'
+
 AppSettingsPage({
   state: {
-    sensorsList: [],
+    entityList: [],
     props: {},
   },
   setState(props) {
     this.state.props = props;
-    if (props.settingsStorage.getItem("sensorsList")) {
-      this.state.sensorsList = JSON.parse(
-        props.settingsStorage.getItem("sensorsList")
+    if (props.settingsStorage.getItem("entityList")) {
+      this.state.entityList = JSON.parse(
+        props.settingsStorage.getItem("entityList")
       );
     } else {
-      this.state.sensorsList = [];
-      console.log("Initilized");
+      this.state.entityList = [];
+      console.log("Initialized");
     }
   },
   setItem() {
-    const newStr = JSON.stringify(this.state.sensorsList);
-    this.state.props.settingsStorage.setItem("sensorsList", newStr);
+    const newStr = JSON.stringify(this.state.entityList);
+    this.state.props.settingsStorage.setItem("entityList", newStr);
   },
-  clearSensors() {
-		this.state.sensorsList = [];
-		this.setItem();
-	},
-  toggleSensor(key, val) {
-    const newSensorList = this.state.sensorsList.map((_item) => {
+  toggleEntity(key, val) {
+    const newEntityList = this.state.entityList.map((_item) => {
       const item = _item;
       if (item.key === key) {
         item.value = val;
       }
       return item;
     });
-    this.state.sensorsList = newSensorList;
+    this.state.entityList = newEntityList;
     this.setItem();
+  },
+  moveEntityToTop(index) {
+    entity = this.state.entityList[index];
+    this.state.entityList = this.state.entityList.filter((_, ind) => {
+      return ind !== index
+    })
+    this.state.entityList.unshift(entity);
+    this.setItem()
   },
   build(props) {
     this.setState(props);
@@ -47,8 +53,8 @@ AppSettingsPage({
       overflow: "hidden",
       borderWidth: "2px",
     };
-    let sensorsList = [];
-    this.state.sensorsList.forEach((item, i) => {
+    let entityList = [];
+    this.state.entityList.forEach((item, i) => {
       if (
         !item.key.startsWith('light.') && 
         !item.key.startsWith('switch.') && 
@@ -60,23 +66,44 @@ AppSettingsPage({
       ) {
         return;
       }
-      sensorsList.push(
-        View(
-          {
-            style: {
-              borderBottom: "1px solid #eaeaea",
-              padding: "6px 0",
-              marginBottom: "6px",
-              display: "flex",
-              flexDirection: "row",
-            },
-          },
-          Toggle({
-            label: `${item.title} (${item.key})`,
-            value: item.value,
-            onChange: this.toggleSensor.bind(this, item.key),
-          }),
-        )
+      entityList.push(
+        View({ 
+          style: { 
+            display: 'flex', 
+            borderBottom: "1px solid #eaeaea", 
+            padding: "6px 0", 
+            marginBottom: '6px' 
+          }}, 
+        [
+          View({ 
+            style: { 
+              width: "70%", 
+              overflow: "hidden" 
+            }}, 
+            Toggle({
+              label: `${item.title} (${item.key})`,
+              value: item.value,
+              onChange: this.toggleEntity.bind(this, item.key),
+            })
+          ),
+          View({ style: { flex: 1 }},
+            Button({
+              label: gettext('^'),
+              style: {
+                float: "right",
+                top: '10px',
+                minWidth: '32px',
+                height: '10px',
+                borderRadius: '60px',
+                background: '#18BCF2',
+                color: 'white'
+              },
+              onClick: () => {
+                this.moveEntityToTop(i)
+              }
+            }),
+          )
+        ])
       );
     });
     return Section({}, [
@@ -98,16 +125,17 @@ AppSettingsPage({
       Section(
         {},
         Button({
-          label: "Refresh sensors",
+          label: "Refresh entities",
           async onClick() {
-            props.settingsStorage.removeItem("sensorsList");
+            props.settingsStorage.removeItem("entityList");
             props.settingsStorage.setItem("listFetchRandom", Math.random());
             return;
           },
         })
       ),
-      Text({}, "Only media players, light, switches and (binary) sensors are supported for now:"),
-      sensorsList.length > 0 &&
+      Text({}, "Only the media player, light, switch, script, automation and (binary) " +  
+      "sensor entities are supported for now:"),
+      entityList.length > 0 &&
         View(
           {
             style: {
@@ -118,7 +146,7 @@ AppSettingsPage({
               backgroundColor: "white",
             },
           },
-          sensorsList
+          entityList
         ),
     ]);
   },

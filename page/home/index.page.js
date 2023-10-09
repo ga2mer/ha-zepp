@@ -17,9 +17,9 @@ Page({
     logger.debug("page build invoked");
     hmUI.setLayerScrolling(true);
   },
-  getSensorsList() {
+  getEntityList() {
     messageBuilder
-      .request({ method: "GET_SENSORS_LIST" })
+      .request({ method: "GET_ENTITY_LIST" })
       .then(({ result, error }) => {
         if (error) {
           this.drawError(error);
@@ -49,11 +49,11 @@ Page({
     this.state.widgets.push(widget);
     return widget;
   },
-  createSensor(item) {
+  createEntity(item) {
     const titleHeight = 32;
     const valueHeight = 32;
-    const sensorsGap = 10;
-    const totalHeight = titleHeight + valueHeight + sensorsGap;
+    const entitiesGap = 10;
+    const totalHeight = titleHeight + valueHeight + entitiesGap;
     this.createWidget(hmUI.widget.TEXT, {
       x: 0,
       y: this.state.y,
@@ -91,8 +91,8 @@ Page({
   createSwitchable(item) {
     const titleHeight = 32;
     const valueHeight = 48;
-    const sensorsGap = 10;
-    const totalHeight = titleHeight + valueHeight + sensorsGap;
+    const entitiesGap = 10;
+    const totalHeight = titleHeight + valueHeight + entitiesGap;
     this.createWidget(hmUI.widget.TEXT, {
       x: 0,
       y: this.state.y,
@@ -137,8 +137,8 @@ Page({
   createExecutable(item) {
     const titleHeight = 32;
     const valueHeight = 48;
-    const sensorsGap = 10;
-    const totalHeight = titleHeight + valueHeight + sensorsGap;
+    const entitiesGap = 10;
+    const totalHeight = titleHeight + valueHeight + entitiesGap;
     this.createWidget(hmUI.widget.TEXT, {
       x: 0,
       y: this.state.y,
@@ -187,7 +187,7 @@ Page({
     if (item.type === "script" && item.state !== "unavailable") {
       return this.createExecutable(item);
     }
-    return this.createSensor(item);
+    return this.createEntity(item);
   },
   createAndUpdateList(showEmpty = true) {
     this.clearWidgets();
@@ -263,7 +263,7 @@ Page({
   onInit() {
     if (hmBle.connectStatus()) {
       this.drawWait();
-      this.getSensorsList();
+      this.getEntityList();
     } else {
       this.drawNoBLEConnect();
     }
