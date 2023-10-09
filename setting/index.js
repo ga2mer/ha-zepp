@@ -69,17 +69,14 @@ AppSettingsPage({
       entityList.push(
         View({ 
           style: { 
+            position: 'relative',
             display: 'flex', 
             borderBottom: "1px solid #eaeaea", 
             padding: "6px 0", 
             marginBottom: '6px' 
           }}, 
         [
-          View({ 
-            style: { 
-              width: "70%", 
-              overflow: "hidden" 
-            }}, 
+          View({ style: { width: "70%" }}, 
             Toggle({
               label: `${item.title} (${item.key})`,
               value: item.value,
@@ -90,8 +87,9 @@ AppSettingsPage({
             Button({
               label: gettext('^'),
               style: {
-                float: "right",
-                top: '10px',
+                position: 'absolute',
+                bottom: '10px',
+                right: '0px',
                 minWidth: '32px',
                 height: '10px',
                 borderRadius: '60px',
