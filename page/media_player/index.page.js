@@ -78,9 +78,9 @@ Page({
         }
         return this.drawTextMessage(text);
     },
-    getSensorInfo() {
+    getEntityInfo() {
         messageBuilder
-            .request({ method: "GET_SENSOR", entity_id: this.state.item.key })
+            .request({ method: "GET_ENTITY", entity_id: this.state.item.key })
             .then(({ result, error }) => {
                 if (error) {
                     if (this.state.rendered) {
@@ -110,7 +110,7 @@ Page({
             delay,
             pageUpdatePeriod,
             function (page) {
-                page.getSensorInfo()
+                page.getEntityInfo()
             },
             this
         )
@@ -141,7 +141,7 @@ Page({
         messageBuilder.request({ method: "MEDIA_ACTION", entity_id: this.state.item.key, value: '{}', service: action });
 
         if (action.includes("_track")) {
-            this.getSensorInfo(1000)
+            this.getEntityInfo(1000)
         }
         else {
             if (this.positionArc)
@@ -184,7 +184,7 @@ Page({
         this.clearWidgets()
 
         if (typeof this.state.item !== 'object') {
-            this.drawError("Wrong sensor data " + typeof this.state.item)
+            this.drawError("Wrong entity data " + typeof this.state.item)
             return;
         }
 
@@ -410,7 +410,7 @@ Page({
         logger.log("param", param)
         this.state.item = JSON.parse(param)
         this.drawWait()
-        this.getSensorInfo()
+        this.getEntityInfo()
     },
     build() { hmUI.setLayerScrolling(false); },
     onDestroy() { this.destroyTimers(); }

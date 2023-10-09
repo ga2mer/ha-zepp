@@ -58,9 +58,9 @@ Page({
         }
         return this.drawTextMessage(text);
     },
-    getSensorInfo() {
+    getEntityInfo() {
         messageBuilder
-            .request({ method: "GET_SENSOR", entity_id: this.state.item.key })
+            .request({ method: "GET_ENTITY", entity_id: this.state.item.key })
             .then(({ result, error }) => {
                 if (error) {
                     this.drawError(error);
@@ -175,7 +175,7 @@ Page({
         this.clearWidgets()
 
         if (typeof this.state.item !== 'object') {
-            this.drawError("Wrong sensor data " + typeof this.state.item)
+            this.drawError("Wrong entity data " + typeof this.state.item)
             return;
         }
 
@@ -216,7 +216,7 @@ Page({
                         page.state.reloadTimer = null
                         page.clearWidgets()
                         page.drawWait()
-                        page.getSensorInfo()
+                        page.getEntityInfo()
                     },
                     this
                 )
@@ -285,7 +285,7 @@ Page({
 
         this.state.item = JSON.parse(param)
         this.drawWait()
-        this.getSensorInfo()
+        this.getEntityInfo()
     },
     build() {
         hmUI.setLayerScrolling(false);
