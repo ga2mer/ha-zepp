@@ -30,6 +30,7 @@
             "page/light/index.page",
             "page/light/effectPicker.page",
             "page/media_player/index.page",
+            "page/sensors_update/index.page",
             "page/test_page/index.page"
           ],
           "window": {

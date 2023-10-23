@@ -4,6 +4,8 @@ import { DEVICE_HEIGHT, DEVICE_WIDTH, TOP_BOTTOM_OFFSET } from "./index.style";
 const { messageBuilder, appId } = getApp()._options.globalData;
 
 const logger = DeviceRuntimeCore.HmLogger.getLogger("ha-zepp-main");
+const POLL_ALARM_PREF_ID = 'my_bluetooth_poll_alarm'
+const UPDATE_SENSORS_BOOL_STATE = 'sensors_update_state'
 
 Page({
   state: {
@@ -165,15 +167,31 @@ Page({
     this.state.y += totalHeight;
   },
   createElement(item) {
-    if (item === "end") {
+    if (item === "updateSensors") {
+      const updateSensorsBool = hmFS.SysProGetBool(UPDATE_SENSORS_BOOL_STATE)
+      const nextState = updateSensorsBool ? false : true
       return this.createWidget(hmUI.widget.BUTTON, {
-        x: 0,
-        y: this.state.y,
-        w: DEVICE_WIDTH,
-        h: TOP_BOTTOM_OFFSET,
-        //text: "TEST",
+        x: DEVICE_WIDTH/4,
+        y: this.state.y+20,
+        w: DEVICE_WIDTH/2,
+        h: TOP_BOTTOM_OFFSET+20,
+        normal_color: 0x3a9e9b,
+        press_color: 0x51e0dc,
+        radius: 20,
+        text: updateSensorsBool ? "Stop sensor updates" : "Start sensor updates",
         click_func: () => {
-          hmApp.gotoPage({ file: 'page/test_page/index.page' })
+          hmFS.SysProSetBool(UPDATE_SENSORS_BOOL_STATE, nextState)
+          if (nextState) {
+            hmApp.gotoPage({ file: 'page/sensors_update/index.page' })
+          }
+          else {
+            const existingAlarm = hmFS.SysProGetInt64(POLL_ALARM_PREF_ID)
+            logger.debug("ALARM ID: " + existingAlarm);
+            if (existingAlarm) {
+                hmApp.alarmCancel(existingAlarm)
+            }
+            hmApp.reloadPage({ url: 'page/home/index.page' })
+          }
         }
       });
     }
@@ -189,13 +207,13 @@ Page({
     }
     return this.createEntity(item);
   },
-  createAndUpdateList(showEmpty = true) {
+  createAndUpdateList() {
     this.clearWidgets();
     this.state.rendered = false;
     this.state.dataList.forEach((item) => {
       this.createElement(item);
     });
-    this.createElement("end");
+    this.createElement("updateSensors");
     this.state.rendered = true;
   },
   drawTextMessage(message, button) {
@@ -243,7 +261,8 @@ Page({
     return this.drawTextMessage("No connection to\n the application");
   },
   drawWait() {
-    return this.drawTextMessage('Loading...');
+    const existingAlarm = hmFS.SysProGetInt64(POLL_ALARM_PREF_ID)
+    return this.drawTextMessage('Loading... ' + existingAlarm);
   },
   drawError(message) {
     let text = "An error occurred";

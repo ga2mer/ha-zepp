@@ -245,7 +245,6 @@ AppSideService({
           ctx.response({ data: { error: e.message } });
         }
       }
-
       if (payload.method === "GET_ENTITY") {
         try {
           const entityState = await getEntityState(payload.entity_id);
@@ -253,6 +252,20 @@ AppSideService({
         } catch (e) {
           ctx.response({ data: { error: e.message } });
         }
+      }
+      if (payload.method === "UPDATE_SENSORS") {
+        await request(`/api/states/sensor.${payload.device_id}_${payload.sensor_name}`, {
+          method: "POST",
+          body: JSON.stringify({
+            state: payload.state,
+            attributes: {
+              unit_of_measurement: payload.unit_of_measurement,
+              friendly_name: payload.friendly_name,
+              values: payload.values,
+            }
+          }),
+        });
+        ctx.response({ data: { result: [] } });
       }
     });
   },
