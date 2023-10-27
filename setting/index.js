@@ -121,6 +121,16 @@ AppSettingsPage({
         subStyle: textInputStyle,
       }),
       Section(
+        { style: {width: '50%'} },
+        Toggle({
+          label: "Update sensor data to HA, interval 1 hour (BETA)",
+          value: (props.settingsStorage.getItem("updateSensorsBool") === 'true'),
+          onChange: (value) => {
+            props.settingsStorage.setItem("updateSensorsBool", value);
+          },
+        })
+      ),
+      Section(
         {},
         Button({
           label: "Refresh entities",

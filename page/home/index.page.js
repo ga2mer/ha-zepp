@@ -167,31 +167,15 @@ Page({
     this.state.y += totalHeight;
   },
   createElement(item) {
-    if (item === "updateSensors") {
-      const updateSensorsBool = hmFS.SysProGetBool(UPDATE_SENSORS_BOOL_STATE)
-      const nextState = updateSensorsBool ? false : true
+    if (item === "end") {
       return this.createWidget(hmUI.widget.BUTTON, {
-        x: DEVICE_WIDTH/4,
-        y: this.state.y+20,
-        w: DEVICE_WIDTH/2,
-        h: TOP_BOTTOM_OFFSET+20,
-        normal_color: 0x3a9e9b,
-        press_color: 0x51e0dc,
-        radius: 20,
-        text: updateSensorsBool ? "Stop sensor updates" : "Start sensor updates",
+        x: 0,
+        y: this.state.y,
+        w: DEVICE_WIDTH,
+        h: TOP_BOTTOM_OFFSET,
+        //text: "TEST",
         click_func: () => {
-          hmFS.SysProSetBool(UPDATE_SENSORS_BOOL_STATE, nextState)
-          if (nextState) {
-            hmApp.gotoPage({ file: 'page/sensors_update/index.page' })
-          }
-          else {
-            const existingAlarm = hmFS.SysProGetInt64(POLL_ALARM_PREF_ID)
-            logger.debug("ALARM ID: " + existingAlarm);
-            if (existingAlarm) {
-                hmApp.alarmCancel(existingAlarm)
-            }
-            hmApp.reloadPage({ url: 'page/home/index.page' })
-          }
+          hmApp.gotoPage({ file: 'page/sensors_update/index.page' })
         }
       });
     }
@@ -213,7 +197,7 @@ Page({
     this.state.dataList.forEach((item) => {
       this.createElement(item);
     });
-    this.createElement("updateSensors");
+    this.createElement("end");
     this.state.rendered = true;
   },
   drawTextMessage(message, button) {
@@ -261,8 +245,30 @@ Page({
     return this.drawTextMessage("No connection to\n the application");
   },
   drawWait() {
-    const existingAlarm = hmFS.SysProGetInt64(POLL_ALARM_PREF_ID)
-    return this.drawTextMessage('Loading... ' + existingAlarm);
+    return this.drawTextMessage('Loading...');
+  },
+  getUpdateSensorsState() {
+    const lastState = hmFS.SysProGetBool(UPDATE_SENSORS_BOOL_STATE);
+    logger.debug("getUpdateSensorsState() lastState: " + lastState);
+    messageBuilder
+    .request({ method: "GET_UPDATE_SENSORS_STATE" })
+    .then(({ result }) => {
+      logger.debug("getUpdateSensorsState() settings state: " + result);
+      // if start sensor updates
+      if (result === true && lastState === false) {
+        hmFS.SysProSetBool(UPDATE_SENSORS_BOOL_STATE, true);
+        hmApp.gotoPage({ file: 'page/sensors_update/index.page', param: POLL_ALARM_PREF_ID })
+      }
+      // if stop sensor updates
+      else if (result === false && lastState === true) {
+        hmFS.SysProSetBool(UPDATE_SENSORS_BOOL_STATE, false);
+        const existingAlarm = hmFS.SysProGetInt64(POLL_ALARM_PREF_ID)
+        if (existingAlarm) {
+            hmApp.alarmCancel(existingAlarm)
+        }
+        hmApp.reloadPage({ url: 'page/home/index.page' })
+      }
+    })
   },
   drawError(message) {
     let text = "An error occurred";
@@ -282,6 +288,7 @@ Page({
   onInit() {
     if (hmBle.connectStatus()) {
       this.drawWait();
+      this.getUpdateSensorsState();
       this.getEntityList();
     } else {
       this.drawNoBLEConnect();

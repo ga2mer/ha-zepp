@@ -7,29 +7,32 @@ const vibrate = hmSensor.createSensor(hmSensor.id.VIBRATE)
 
 Page({
     state: {
-        text: null,
+        textWidget: null,
+        deviceId: null,
+        nickName: null
     },
     onInit(param) {
         logger.debug('onInit')
         vibrate.stop()
         vibrate.scene = 27
 
+        const existingAlarm = hmFS.SysProGetInt64(POLL_ALARM_PREF_ID)
         if (param === POLL_ALARM_PREF_ID) {
-            const existingAlarm = hmFS.SysProGetInt64(POLL_ALARM_PREF_ID)
             if (existingAlarm) {
                 hmApp.alarmCancel(existingAlarm)
             }
+            const alarm = hmApp.alarmNew({
+                file: 'page/sensors_update/index.page',
+                appid: 391257,
+                delay: 3600,
+                param: POLL_ALARM_PREF_ID
+            })
+            hmFS.SysProSetInt64(POLL_ALARM_PREF_ID, alarm)
+            logger.debug("ALARM ID: " + alarm)
         }
-        const alarm = hmApp.alarmNew({
-            file: 'page/sensors_update/index.page',
-            appid: 391257,
-            delay: 600,
-            param: POLL_ALARM_PREF_ID
-        })
-        hmFS.SysProSetInt64(POLL_ALARM_PREF_ID, alarm)
-        logger.debug("ALARM ID: " + alarm)
+        this.drawTextMessage("Updating sensors\nto Home Assistant\nAlarm ID: " + existingAlarm);
     },
-    drawAlarmId(alarmId) {
+    drawTextMessage(message) {
         if (this.state.text != null) {
             hmUI.deleteWidget(this.state.text);
         }
@@ -38,39 +41,247 @@ Page({
           y: 0,
           w: DEVICE_WIDTH,
           h: DEVICE_HEIGHT,
-          text: alarmId,
+          text: message,
           text_size: 18,
           color: 0xffffff,
           align_h: hmUI.align.CENTER_H,
           align_v: hmUI.align.CENTER_V,
         });
-        this.state.text = text
+        this.state.textWidget = text
+    },
+    updateHeartRate() {
+        const heart = hmSensor.createSensor(hmSensor.id.HEART)
+        logger.debug("Updating heart rate: " + heart.last)
+        messageBuilder
+            .request({ 
+                method: "UPDATE_SENSORS", 
+                sensor_name: "heart_rate", 
+                state: heart.last,
+                device_id: this.state.deviceId,
+                attributes: {
+                    unit_of_measurement: "bpm",
+                    friendly_name: this.state.nickName + " Heart Rate",
+                    today_values: heart.today
+                }
+            })
+            .then(({ result }) => { 
+                console.log(result); 
+            })
+    },
+    updateSleep() {
+        const sleep = hmSensor.createSensor(hmSensor.id.SLEEP)
+        const basicInfo = sleep.getBasicInfo()
+        const sleepTime = sleep.getTotalTime()
+        const sleepStageArray = sleep.getSleepStageData()
+        logger.debug("Updating Sleep Data: " + sleepTime)
+        messageBuilder
+            .request({
+                method: "UPDATE_SENSORS",
+                sensor_name: "sleep_minutes",
+                state: sleepTime,
+                device_id: this.state.deviceId,
+                attributes: {
+                    unit_of_measurement: "min",
+                    friendly_name: this.state.nickName + " Sleep Minutes",
+                    sleep_score: basicInfo.score,
+                    sleep_start_time: basicInfo.startTime,
+                    sleep_end_time: basicInfo.endTime,
+                    deep_sleep_minutes:  basicInfo.deepMin,
+                    sleep_stage_data: sleepStageArray
+                }
+            })
+            .then(({ result }) => { 
+                console.log(result); 
+            })
+    },
+    updateSteps() {
+        const step = hmSensor.createSensor(hmSensor.id.STEP)
+        logger.debug("Updating daily steps: " + step.current)
+        messageBuilder
+            .request({
+                method: "UPDATE_SENSORS",
+                sensor_name: "steps_daily",
+                state: step.current,
+                device_id: this.state.deviceId,
+                attributes: {
+                    unit_of_measurement: "steps",
+                    friendly_name: this.state.nickName + " Daily Steps",
+                    daily_steps_target: step.target 
+                }
+            })
+            .then(({ result }) => { 
+                console.log(result); 
+            })
+    },
+    updateBattery() {
+        const battery = hmSensor.createSensor(hmSensor.id.BATTERY)
+        logger.debug("Updating battery: " + battery.current)
+        messageBuilder
+            .request({
+                method: "UPDATE_SENSORS",
+                sensor_name: "battery",
+                state: battery.current,
+                device_id: this.state.deviceId,
+                attributes: {
+                    unit_of_measurement: "%",
+                    friendly_name: this.state.nickName + " Battery"
+                }
+            })
+            .then(({ result }) => { 
+                console.log(result); 
+            })
+    },
+    updatePAI() {
+        const pai = hmSensor.createSensor(hmSensor.id.PAI)
+        logger.debug("Updating calories: " + pai.dailypai)
+        messageBuilder
+            .request({
+                method: "UPDATE_SENSORS",
+                sensor_name: "pai",
+                state: pai.dailypai,
+                device_id: this.state.deviceId,
+                attributes: {
+                    unit_of_measurement: "pai",
+                    friendly_name: this.state.nickName + " PAI",
+                    total_pai: pai.totalpai,
+                    six_days_before_pai: pai.prepai0,
+                    five_days_before_pai: pai.prepai1,
+                    four_days_before_pai: pai.prepai2,
+                    three_days_before_pai: pai.prepai3,
+                    two_days_before_pai: pai.prepai4,
+                    one_day_before_pai: pai.prepai5,
+                    today_pai: pai.prepai6
+                }
+            })
+            .then(({ result }) => { 
+                console.log(result); 
+            })
+    },
+    updateDistance() {
+        const distance = hmSensor.createSensor(hmSensor.id.DISTANCE)
+        logger.debug("Updating distance: " + distance.current)
+        messageBuilder
+            .request({
+                method: "UPDATE_SENSORS",
+                sensor_name: "distance_travelled",
+                state: distance.current,
+                device_id: this.state.deviceId,
+                attributes: {
+                    unit_of_measurement: "km",
+                    friendly_name: this.state.nickName + " Distance Travelled",
+                }
+            })
+            .then(({ result }) => { 
+                console.log(result); 
+            })
+    },
+    updateStand() {
+        const stand = hmSensor.createSensor(hmSensor.id.STAND)
+        logger.debug("Updating stand: " + stand.current)
+        messageBuilder
+            .request({
+                method: "UPDATE_SENSORS",
+                sensor_name: "standing_hours",
+                state: stand.current,
+                device_id: this.state.deviceId,
+                attributes: {
+                    unit_of_measurement: "h",
+                    friendly_name: this.state.nickName + " Standing Hours",
+                    standing_hours_target: stand.target
+                }
+            })
+            .then(({ result }) => { 
+                console.log(result); 
+            })
+    },
+    updateFatBurning() {
+        const fatburn = hmSensor.createSensor(hmSensor.id.FAT_BURRING)
+        logger.debug("Updating Fat Burning: " + fatburn.current)
+        messageBuilder
+            .request({
+                method: "UPDATE_SENSORS",
+                sensor_name: "fat_burning_minutes",
+                state: fatburn.current,
+                device_id: this.state.deviceId,
+                attributes: {
+                    unit_of_measurement: "min",
+                    friendly_name: this.state.nickName + " Fat Burning Minutes",
+                    fat_burning_minutes_target: fatburn.target
+                }
+            })
+            .then(({ result }) => { 
+                console.log(result); 
+            })
+    },
+    updateWear() {
+        const wear = hmSensor.createSensor(hmSensor.id.WEAR)
+        logger.debug("Updating Wear: " + wear.current)
+        let status = "";
+        switch(wear.current) {
+            case 0:
+                status = "Not worn"
+                break
+            case 1:
+                status = "Wearing"
+                break
+            case 2:
+                status = "In motion"
+                break
+            case 3:
+                status = "Not sure"
+                break
+            default:
+                status = "Unknown status code"
+        }
+        messageBuilder
+            .request({
+                method: "UPDATE_SENSORS",
+                sensor_name: "current_wear_status",
+                state: status,
+                device_id: this.state.deviceId,
+                attributes: {
+                    friendly_name: this.state.nickName + " Current Wear Status",
+                }
+            })
+            .then(({ result }) => { 
+                console.log(result); 
+            })
+    },
+    updateCalories() {
+        const calorie = hmSensor.createSensor(hmSensor.id.CALORIE)
+        logger.debug("Updating calories: " + calorie.current)
+        messageBuilder
+            .request({
+                method: "UPDATE_SENSORS",
+                sensor_name: "calories_burnt_daily",
+                state: calorie.current,
+                device_id: this.state.deviceId,
+                attributes: {
+                    unit_of_measurement: "kcal",
+                    friendly_name: this.state.nickName + " Burnt Calories"
+                }
+            })
+            .then(({ result }) => { 
+                console.log(result); 
+                hmApp.goBack();
+            })
     },
     build() {
         if (hmBle.connectStatus() === true) {
-            const nickName = hmSetting.getUserData().nickName;
-            const deviceId = (hmSetting.getDeviceInfo().deviceName + "_" 
-            + nickName).toLowerCase().replaceAll(" ", "_");  
-
+            this.state.nickName = hmSetting.getUserData().nickName;
+            this.state.deviceId = (hmSetting.getDeviceInfo().deviceName + "_" 
+            + this.state.nickName).toLowerCase().replaceAll(" ", "_");  
             // do the sensor updates.....
-            const heart = hmSensor.createSensor(hmSensor.id.HEART)
-            //const rand = Math.floor(Math.random() * 100)
-            logger.debug("DEVICEID: " + deviceId)
-            messageBuilder
-                .request({ 
-                    method: "UPDATE_SENSORS", 
-                    sensor_name: "heart_rate", 
-                    state: heart.last,//rand,
-                    unit_of_measurement: "bpm",
-                    friendly_name: nickName + " Heart Rate",//"Bram Heart Rate",
-                    device_id: deviceId,//"xiaomi_smart_band_7_bram", 
-                    values: heart.today
-                })
-                .then(({ result }) => {
-                    console.log(result);
-                    hmApp.goBack();
-                }) // also catch error from HTTP response here (also goback()???)
-            //hmApp.goBack()
+            this.updateHeartRate()
+            this.updateSleep()
+            this.updateSteps()
+            this.updateBattery()
+            this.updatePAI()
+            this.updateDistance()
+            this.updateStand()
+            this.updateFatBurning()
+            this.updateWear()
+            this.updateCalories()
         } else {
             vibrate.start()
         }

@@ -253,16 +253,17 @@ AppSideService({
           ctx.response({ data: { error: e.message } });
         }
       }
+      if (payload.method === "GET_UPDATE_SENSORS_STATE") {
+        const state = (settings.settingsStorage.getItem("updateSensorsBool") === 'true');
+        ctx.response({ data: { result: state }})
+      }
       if (payload.method === "UPDATE_SENSORS") {
+        const attributes = payload.attributes
         await request(`/api/states/sensor.${payload.device_id}_${payload.sensor_name}`, {
           method: "POST",
           body: JSON.stringify({
             state: payload.state,
-            attributes: {
-              unit_of_measurement: payload.unit_of_measurement,
-              friendly_name: payload.friendly_name,
-              values: payload.values,
-            }
+            attributes
           }),
         });
         ctx.response({ data: { result: [] } });
