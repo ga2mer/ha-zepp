@@ -1,11 +1,13 @@
 // import { getScrollListDataConfig } from '../../utils'
 import { DEVICE_HEIGHT, DEVICE_WIDTH, TOP_BOTTOM_OFFSET } from "./index.style";
 
-const { messageBuilder, appId } = getApp()._options.globalData;
+const {
+  messageBuilder,
+  FS_REF_SENSORS_UPDATE_ALARM_ID,
+  FS_REF_SENSORS_UPDATE_STATE,
+} = getApp()._options.globalData;
 
 const logger = DeviceRuntimeCore.HmLogger.getLogger("ha-zepp-main");
-const POLL_ALARM_PREF_ID = 'my_bluetooth_poll_alarm'
-const UPDATE_SENSORS_BOOL_STATE = 'sensors_update_state'
 
 Page({
   state: {
@@ -17,7 +19,39 @@ Page({
   },
   build() {
     logger.debug("page build invoked");
+    this.drawWait();
+
+    if (hmBle.connectStatus() === true) {
+      const lastState = hmFS.SysProGetBool(FS_REF_SENSORS_UPDATE_STATE);
+      messageBuilder
+        .request({ method: "GET_UPDATE_SENSORS_STATE" })
+        .then(({ result }) => {
+          this.toggleSensorUpdates((turnOn = result), (isOn = lastState));
+          this.getEntityList();
+        });
+    } else {
+      this.drawNoBLEConnect();
+    }
     hmUI.setLayerScrolling(true);
+  },
+  toggleSensorUpdates(turnOn, isOn) {
+    if (turnOn === true && isOn === false) {
+      //start sensor updates to HA
+      hmFS.SysProSetBool(FS_REF_SENSORS_UPDATE_STATE, true);
+      hmApp.gotoPage({
+        file: "page/sensors_update/index.page",
+        param: FS_REF_SENSORS_UPDATE_ALARM_ID,
+      });
+    } else if (turnOn === false && isOn === true) {
+      // stop sensor updates to HA
+      this.drawTextMessage("Turning sensor updates off..\nApp closing");
+      hmFS.SysProSetBool(FS_REF_SENSORS_UPDATE_STATE, false);
+      const existingAlarm = hmFS.SysProGetInt64(FS_REF_SENSORS_UPDATE_ALARM_ID);
+      if (existingAlarm) {
+        hmApp.alarmCancel(existingAlarm);
+      }
+      hmApp.gotoHome();
+    }
   },
   getEntityList() {
     messageBuilder
@@ -36,7 +70,12 @@ Page({
       });
   },
   toggleSwitchable(item, value) {
-    messageBuilder.request({ method: "TOGGLE_SWITCH", entity_id: item.key, value, service: item.type });
+    messageBuilder.request({
+      method: "TOGGLE_SWITCH",
+      entity_id: item.key,
+      value,
+      service: item.type,
+    });
   },
   clearWidgets() {
     this.state.widgets.forEach((widget, index) => {
@@ -77,16 +116,19 @@ Page({
       align_h: hmUI.align.CENTER_H,
     });
 
-    if (item.type === "light" | item.type === "media_player") {
-      const iconsize = 24
+    if ((item.type === "light") | (item.type === "media_player")) {
+      const iconsize = 24;
       const details_button = this.createWidget(hmUI.widget.IMG, {
         x: DEVICE_WIDTH - iconsize - 5,
         y: this.state.y + titleHeight + valueHeight / 2 - iconsize / 2,
-        src: "forward24.png"
+        src: "forward24.png",
       });
       details_button.addEventListener(hmUI.event.CLICK_UP, (info) => {
-        hmApp.gotoPage({ file: `page/${item.type}/index.page`, param: JSON.stringify(item) })
-      })
+        hmApp.gotoPage({
+          file: `page/${item.type}/index.page`,
+          param: JSON.stringify(item),
+        });
+      });
     }
     this.state.y += totalHeight;
   },
@@ -122,19 +164,21 @@ Page({
       },
     });
 
-    if (item.type === "light" | item.type === "media_player") {
-      const iconsize = 24
+    if ((item.type === "light") | (item.type === "media_player")) {
+      const iconsize = 24;
       const details_button = this.createWidget(hmUI.widget.IMG, {
         x: DEVICE_WIDTH - iconsize - 5,
         y: this.state.y + titleHeight + valueHeight / 2 - iconsize / 2,
-        src: "forward24.png"
+        src: "forward24.png",
       });
       details_button.addEventListener(hmUI.event.CLICK_UP, (info) => {
-        hmApp.gotoPage({ file: `page/${item.type}/index.page`, param: JSON.stringify(item) })
-      })
+        hmApp.gotoPage({
+          file: `page/${item.type}/index.page`,
+          param: JSON.stringify(item),
+        });
+      });
     }
     this.state.y += totalHeight;
-
   },
   createExecutable(item) {
     const titleHeight = 32;
@@ -157,11 +201,16 @@ Page({
       w: DEVICE_WIDTH / 2,
       h: valueHeight,
       text: item.state === "on" ? "Cancel" : "Run",
-      normal_color: 0x18BCF2,
-      press_color: 0x61CEF2,
+      normal_color: 0x18bcf2,
+      press_color: 0x61cef2,
       radius: 20,
       click_func: (button) => {
-        messageBuilder.request({ method: "PRESS_BUTTON", entity_id: item.key, service: item.type, current_state: item.state })
+        messageBuilder.request({
+          method: "PRESS_BUTTON",
+          entity_id: item.key,
+          service: item.type,
+          current_state: item.state,
+        });
       },
     });
     this.state.y += totalHeight;
@@ -175,11 +224,11 @@ Page({
         h: TOP_BOTTOM_OFFSET,
         //text: "TEST",
         click_func: () => {
-          hmApp.gotoPage({ file: 'page/sensors_update/index.page' })
-        }
+          hmApp.gotoPage({ file: "page/sensors_update/index.page" });
+        },
       });
     }
-    if (typeof item !== 'object' || typeof item.type !== 'string') return;
+    if (typeof item !== "object" || typeof item.type !== "string") return;
     if (
       ["light", "switch", "automation"].includes(item.type) &&
       item.state !== "unavailable"
@@ -224,12 +273,12 @@ Page({
       if (button.textColor) {
         buttonParams.text_color = button.textColor;
       }
-      if (typeof button.onClick === 'function') {
+      if (typeof button.onClick === "function") {
         buttonParams.click_func = button.onClick;
       }
       this.createWidget(hmUI.widget.BUTTON, {
         x: DEVICE_WIDTH / 2 - 50,
-        y: DEVICE_HEIGHT - (TOP_BOTTOM_OFFSET * 3),
+        y: DEVICE_HEIGHT - TOP_BOTTOM_OFFSET * 3,
         text: button.text,
         w: 100,
         h: 50,
@@ -237,7 +286,7 @@ Page({
         normal_color: 0x333333,
         press_color: 0x444444,
         ...buttonParams,
-      })
+      });
     }
     return;
   },
@@ -245,35 +294,12 @@ Page({
     return this.drawTextMessage("No connection to\n the application");
   },
   drawWait() {
-    return this.drawTextMessage('Loading...');
-  },
-  getUpdateSensorsState() {
-    const lastState = hmFS.SysProGetBool(UPDATE_SENSORS_BOOL_STATE);
-    logger.debug("getUpdateSensorsState() lastState: " + lastState);
-    messageBuilder
-    .request({ method: "GET_UPDATE_SENSORS_STATE" })
-    .then(({ result }) => {
-      logger.debug("getUpdateSensorsState() settings state: " + result);
-      // if start sensor updates
-      if (result === true && lastState === false) {
-        hmFS.SysProSetBool(UPDATE_SENSORS_BOOL_STATE, true);
-        hmApp.gotoPage({ file: 'page/sensors_update/index.page', param: POLL_ALARM_PREF_ID })
-      }
-      // if stop sensor updates
-      else if (result === false && lastState === true) {
-        hmFS.SysProSetBool(UPDATE_SENSORS_BOOL_STATE, false);
-        const existingAlarm = hmFS.SysProGetInt64(POLL_ALARM_PREF_ID)
-        if (existingAlarm) {
-            hmApp.alarmCancel(existingAlarm)
-        }
-        hmApp.reloadPage({ url: 'page/home/index.page' })
-      }
-    })
+    return this.drawTextMessage("Loading...");
   },
   drawError(message) {
     let text = "An error occurred";
-    if (typeof message === 'string') {
-      text += ':\n';
+    if (typeof message === "string") {
+      text += ":\n";
       text += message;
     }
     return this.drawTextMessage(text);
@@ -286,16 +312,9 @@ Page({
     }
   },
   onInit() {
-    if (hmBle.connectStatus()) {
-      this.drawWait();
-      this.getUpdateSensorsState();
-      this.getEntityList();
-    } else {
-      this.drawNoBLEConnect();
-    }
     logger.debug("page onInit invoked");
     messageBuilder.on("call", this.onAppMessage);
-    hmApp.setScreenKeep(true);
+    //hmApp.setScreenKeep(true);
   },
 
   onDestroy() {
