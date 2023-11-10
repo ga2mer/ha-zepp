@@ -20,7 +20,7 @@ async function fetchRequest(url, path, fetchParams = {}) {
       ...fetchParams.headers,
     },
   });
-  if (res.status != 200) {
+  if (res.status < 200 || res.status > 204) {
     throw new Error("HTTP response code: " + res.status);
   }
   return res;
@@ -32,9 +32,9 @@ async function request(path, fetchParams) {
   const hasLocalIP = typeof localHAIP === "string";
   const hasExternalIP = typeof externalHAIP === "string";
   if (!hasLocalIP && !hasExternalIP) {
-    throw new Error('No addresses to requests');
+    throw new Error("No addresses to requests");
   }
-  let error="";
+  let error = "";
   if (hasLocalIP) {
     try {
       const res = await fetchRequest(localHAIP, path, fetchParams);
@@ -51,7 +51,7 @@ async function request(path, fetchParams) {
       error = e;
     }
   }
-  throw new Error('Connection error:\n' + error);
+  throw new Error("Connection error:\n" + error);
 }
 
 async function getEnabledEntities() {
@@ -76,7 +76,7 @@ async function getEnabledEntities() {
         key: actualEntity.entity_id,
         title,
         state,
-        type: actualEntity.entity_id.split(".")[0]
+        type: actualEntity.entity_id.split(".")[0],
       };
     })
     .filter((item) => item);
@@ -104,56 +104,60 @@ async function getEntityState(entity_id) {
     title,
     state,
     type: entity.entity_id.split(".")[0],
-    attributes: {}
-  }
+    attributes: {},
+  };
 
   if (actualEntity.type === "light") {
     if (typeof entity.attributes.brightness === "number")
-      actualEntity.attributes.brightness = Math.round(entity.attributes.brightness / 255 * 100)
+      actualEntity.attributes.brightness = Math.round(
+        (entity.attributes.brightness / 255) * 100
+      );
 
     if (Array.isArray(entity.attributes.rgb_color))
-      actualEntity.attributes.rgb_color = entity.attributes.rgb_color
+      actualEntity.attributes.rgb_color = entity.attributes.rgb_color;
 
     if (typeof entity.attributes.effect === "string")
-      actualEntity.attributes.effect = entity.attributes.effect
+      actualEntity.attributes.effect = entity.attributes.effect;
 
     if (Array.isArray(entity.attributes.effect_list))
-      actualEntity.attributes.effect_list = entity.attributes.effect_list
+      actualEntity.attributes.effect_list = entity.attributes.effect_list;
 
-    actualEntity.attributes.supported_features = entity.attributes.supported_features
+    actualEntity.attributes.supported_features =
+      entity.attributes.supported_features;
   }
 
   if (actualEntity.type === "media_player") {
-
     if (typeof entity.attributes.volume_level === "number")
-      actualEntity.attributes.volume_level = entity.attributes.volume_level
+      actualEntity.attributes.volume_level = entity.attributes.volume_level;
 
     if (typeof entity.attributes.is_volume_muted === "boolean")
-      actualEntity.attributes.is_volume_muted = entity.attributes.is_volume_muted
+      actualEntity.attributes.is_volume_muted =
+        entity.attributes.is_volume_muted;
 
     if (typeof entity.attributes.media_position === "number")
-      actualEntity.attributes.media_position = entity.attributes.media_position
+      actualEntity.attributes.media_position = entity.attributes.media_position;
 
     if (typeof entity.attributes.media_duration === "number")
-      actualEntity.attributes.media_duration = entity.attributes.media_duration
+      actualEntity.attributes.media_duration = entity.attributes.media_duration;
 
     if (typeof entity.attributes.media_title === "string")
-      actualEntity.attributes.media_title = entity.attributes.media_title
+      actualEntity.attributes.media_title = entity.attributes.media_title;
 
     if (typeof entity.attributes.media_artist === "string")
-      actualEntity.attributes.media_artist = entity.attributes.media_artist
+      actualEntity.attributes.media_artist = entity.attributes.media_artist;
 
-    actualEntity.attributes.supported_features = entity.attributes.supported_features
+    actualEntity.attributes.supported_features =
+      entity.attributes.supported_features;
   }
 
-  console.log(actualEntity)
-  return actualEntity
+  console.log(actualEntity);
+  return actualEntity;
 }
 
 AppSideService({
   onInit() {
     console.log("onInit");
-    messageBuilder.listen(() => { });
+    messageBuilder.listen(() => {});
     settings.settingsStorage.addListener(
       "change",
       async ({ key, newValue, oldValue }) => {
@@ -215,14 +219,14 @@ AppSideService({
             entity_id: payload.entity_id,
           }),
         });
-        ctx.response({ data: { result: [] }});
+        ctx.response({ data: { result: [] } });
       }
       if (payload.method === "LIGHT_SET") {
         await request(`/api/services/${payload.service}/turn_on`, {
           method: "POST",
           body: JSON.stringify({
             entity_id: payload.entity_id,
-            ...JSON.parse(payload.value)
+            ...JSON.parse(payload.value),
           }),
         });
         ctx.response({ data: { result: [] } });
@@ -232,7 +236,7 @@ AppSideService({
           method: "POST",
           body: JSON.stringify({
             entity_id: payload.entity_id,
-            ...JSON.parse(payload.value)
+            ...JSON.parse(payload.value),
           }),
         });
         ctx.response({ data: { result: [] } });
@@ -245,11 +249,34 @@ AppSideService({
           ctx.response({ data: { error: e.message } });
         }
       }
-
       if (payload.method === "GET_ENTITY") {
         try {
           const entityState = await getEntityState(payload.entity_id);
           ctx.response({ data: { result: entityState } });
+        } catch (e) {
+          ctx.response({ data: { error: e.message } });
+        }
+      }
+      if (payload.method === "GET_UPDATE_SENSORS_STATE") {
+        const state =
+          settings.settingsStorage.getItem("updateSensorsBool") === "true";
+        ctx.response({ data: { result: state } });
+      }
+      if (payload.method === "UPDATE_SENSORS") {
+        const attributes = payload.attributes;
+        try {
+          // send request and await in case of caught error
+          await request(
+            `/api/states/sensor.${payload.device_id}_${payload.sensor_name}`,
+            {
+              method: "POST",
+              body: JSON.stringify({
+                state: payload.state,
+                attributes,
+              }),
+            }
+          );
+          ctx.response({ data: { result: [] } });
         } catch (e) {
           ctx.response({ data: { error: e.message } });
         }
@@ -261,5 +288,5 @@ AppSideService({
     console.log("onRun");
   },
 
-  onDestroy() { },
+  onDestroy() {},
 });
