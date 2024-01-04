@@ -100,6 +100,47 @@
         }
       ],
       "designWidth": 90
+    },
+    "balance": {
+      "module": {
+        "page": {
+          "pages": [
+            "page/home/index.page",
+            "page/light/index.page",
+            "page/light/effectPicker.page",
+            "page/media_player/index.page",
+            "page/test_page/index.page"
+          ],
+          "window": {
+            "navigationBarBackgroundColor": "#ffffff",
+            "navigationBarTextStyle": "black",
+            "navigationBarTitleText": "Home Assistant",
+            "backgroundColor": "#eeeeee",
+            "backgroundTextStyle": "light"
+          }
+        },
+        "app-side": {
+          "path": "app-side/index"
+        },
+        "setting": {
+          "path": "setting/index"
+        }
+      },
+      "platforms": [
+        {
+          "name": "balance",
+          "deviceSource": 8519936
+        },
+        {
+          "name": "balance-w",
+          "deviceSource": 8519937
+        },
+        {
+          "name": "balance-x",
+          "deviceSource": 8519939
+        }
+      ],
+      "designWidth": 100
     }
   },
   "i18n": {
