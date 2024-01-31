@@ -54,6 +54,7 @@ AppSettingsPage({
       borderWidth: "2px",
     };
     let entityList = [];
+    let filter = props.settingsStorage.getItem("filter")
     this.state.entityList.forEach((item, i) => {
       if (
         !item.key.startsWith('light.') && 
@@ -64,6 +65,9 @@ AppSettingsPage({
         !item.key.startsWith('script.') &&
         !item.key.startsWith('automation.')
       ) {
+        return;
+      }
+      if(!item.key.includes(filter)) {
         return;
       }
       entityList.push(
@@ -119,6 +123,11 @@ AppSettingsPage({
         label: "Long access token:",
         settingsKey: "HAToken",
         subStyle: textInputStyle,
+      }),
+      TextInput({
+        label: "Filter entities id:",
+        subStyle: textInputStyle,
+        settingsKey: "filter",
       }),
       Section(
         { style: {width: '50%'} },
