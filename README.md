@@ -8,6 +8,7 @@ Application that allows you to control a smart home based on the Home Assistant
 - Toggle switch
 - Toggle light, see its effect (if presented), change its brightness (if this possible)
 - Media player support with play/pause, prev/next, volume control
+- Input boolean
 
 ### To Do:
 - Editing colors for lights
@@ -15,6 +16,7 @@ Application that allows you to control a smart home based on the Home Assistant
 
 ### Devices supported
 - Mi Band 7 (You need modified Zepp app (see preparations))
+- Amazfit T-Rex 2 (Official Zepp app is enough)
 - All other Zepp OS devices, but there is no proper UI for them
 
 ### Preparations
