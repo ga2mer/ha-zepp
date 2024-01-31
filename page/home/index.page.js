@@ -230,7 +230,7 @@ Page({
     }
     if (typeof item !== "object" || typeof item.type !== "string") return;
     if (
-      ["light", "switch", "automation"].includes(item.type) &&
+      ["light", "switch", "input_boolean", "automation"].includes(item.type) &&
       item.state !== "unavailable"
     ) {
       return this.createSwitchable(item);

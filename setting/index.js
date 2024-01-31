@@ -56,10 +56,11 @@ AppSettingsPage({
     let entityList = [];
     this.state.entityList.forEach((item, i) => {
       if (
-        !item.key.startsWith('light.') && 
-        !item.key.startsWith('switch.') && 
-        !item.key.startsWith('binary_sensor.') && 
-        !item.key.startsWith('sensor.') && 
+        !item.key.startsWith('light.') &&
+        !item.key.startsWith('switch.') &&
+        !item.key.startsWith('input_boolean.') &&
+        !item.key.startsWith('binary_sensor.') &&
+        !item.key.startsWith('sensor.') &&
         !item.key.startsWith('media_player.') &&
         !item.key.startsWith('script.') &&
         !item.key.startsWith('automation.')
@@ -67,16 +68,16 @@ AppSettingsPage({
         return;
       }
       entityList.push(
-        View({ 
-          style: { 
+        View({
+          style: {
             position: 'relative',
-            display: 'flex', 
-            borderBottom: "1px solid #eaeaea", 
-            padding: "6px 0", 
-            marginBottom: '6px' 
-          }}, 
+            display: 'flex',
+            borderBottom: "1px solid #eaeaea",
+            padding: "6px 0",
+            marginBottom: '6px'
+          }},
         [
-          View({ style: { width: "70%" }}, 
+          View({ style: { width: "70%" }},
             Toggle({
               label: `${item.title} (${item.key})`,
               value: item.value,
@@ -141,7 +142,7 @@ AppSettingsPage({
           },
         })
       ),
-      Text({}, "Only the media player, light, switch, script, automation and (binary) " +  
+      Text({}, "Only the media player, light, switch, input_boolean, script, automation and (binary) " +
       "sensor entities are supported for now:"),
       entityList.length > 0 &&
         View(

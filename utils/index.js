@@ -6,6 +6,7 @@ const TYPE = {
   'sensor': 1,
   'binary_sensor': 1,
   'switch': 3,
+  'input_boolean': 3,
   'light': 3,
 };
 

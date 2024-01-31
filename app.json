@@ -5,8 +5,8 @@
     "appName": "Home Assistant",
     "appType": "app",
     "version": {
-      "code": 1,
-      "name": "1.0.1"
+      "code": 2,
+      "name": "1.1.0"
     },
     "icon": "icon.png",
     "vender": "zepp",
