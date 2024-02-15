@@ -22,7 +22,8 @@ Page({
     this.drawWait();
 
     if (hmBle.connectStatus() === true) {
-      const lastState = hmFS.SysProGetBool(FS_REF_SENSORS_UPDATE_STATE);
+      let lastState = hmFS.SysProGetBool(FS_REF_SENSORS_UPDATE_STATE);
+      lastState == undefined ? lastState = false : lastState = lastState
       messageBuilder
         .request({ method: "GET_UPDATE_SENSORS_STATE" })
         .then(({ result }) => {

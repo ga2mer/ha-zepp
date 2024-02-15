@@ -134,7 +134,7 @@ AppSettingsPage({
         { style: {width: '50%'} },
         Toggle({
           label: "Update sensor data to HA, interval 1 hour (BETA)",
-          value: (props.settingsStorage.getItem("updateSensorsBool") === 'true'),
+          value: props.settingsStorage.getItem("updateSensorsBool"),
           onChange: (value) => {
             props.settingsStorage.setItem("updateSensorsBool", value);
           },
