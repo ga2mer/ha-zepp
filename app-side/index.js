@@ -259,7 +259,7 @@ AppSideService({
       }
       if (payload.method === "GET_UPDATE_SENSORS_STATE") {
         const state =
-          settings.settingsStorage.getItem("updateSensorsBool") === "true";
+          (settings.settingsStorage.getItem("updateSensorsBool") === "true");
         ctx.response({ data: { result: state } });
       }
       if (payload.method === "UPDATE_SENSORS") {
