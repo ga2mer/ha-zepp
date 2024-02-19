@@ -15,7 +15,7 @@ Page({
   onInit(param) {
     logger.debug("onInit");
     vibrate.stop();
-    vibrate.scene = 1;
+    vibrate.scene = 23;
 
     const existingAlarm = hmFS.SysProGetInt64(FS_REF_SENSORS_UPDATE_ALARM_ID);
     if (param === FS_REF_SENSORS_UPDATE_ALARM_ID) {
