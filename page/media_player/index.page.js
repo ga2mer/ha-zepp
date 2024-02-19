@@ -256,7 +256,7 @@ Page({
             const powerIconHeight = 48
             const powerIconWidth = 96
             this.state.powerButton = this.createWidget(hmUI.widget.BUTTON, {
-                x: DEVICE_WIDTH - powerIconWidth,
+                x: DEVICE_WIDTH / 4 * 3 - powerIconWidth / 2,
                 y: this.state.y + DEVICE_WIDTH / 4 - powerIconHeight / 2,
                 w: powerIconWidth,
                 h: powerIconHeight,
@@ -296,7 +296,7 @@ Page({
         if (this.state.item.attributes.media_title) {
             this.state.titleText = this.createWidget(hmUI.widget.TEXT, {
                 x: 10,
-                y: this.state.y,
+                y: DEVICE_HEIGHT - seekButtonsHeight - 34 - 34,
                 w: DEVICE_WIDTH - 20,
                 h: 38,
                 text: this.state.item.attributes.media_title,
@@ -311,7 +311,7 @@ Page({
         if (this.state.item.attributes.media_artist) {
             this.state.artistText = this.createWidget(hmUI.widget.TEXT, {
                 x: 10,
-                y: this.state.y,
+                y: DEVICE_HEIGHT - seekButtonsHeight - 34,
                 w: DEVICE_WIDTH - 20,
                 h: 34,
                 text: this.state.item.attributes.media_artist,
