@@ -138,6 +138,7 @@ Page({
     const valueHeight = 48;
     const entitiesGap = 10;
     const totalHeight = titleHeight + valueHeight + entitiesGap;
+    const sliderWidth = 76
     this.createWidget(hmUI.widget.TEXT, {
       x: 0,
       y: this.state.y,
@@ -149,9 +150,9 @@ Page({
       align_h: hmUI.align.CENTER_H,
     });
     this.createWidget(hmUI.widget.SLIDE_SWITCH, {
-      x: DEVICE_WIDTH / 2 - 76 / 2,
+      x: DEVICE_WIDTH / 2 - sliderWidth / 2,
       y: this.state.y + titleHeight,
-      w: DEVICE_WIDTH,
+      w: sliderWidth,
       h: valueHeight,
       select_bg: "switch_on.png",
       un_select_bg: "switch_off.png",
