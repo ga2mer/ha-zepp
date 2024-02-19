@@ -438,6 +438,7 @@ Page({
     }
   },
   onDestroy() {
+    hmUI.setStatusBarVisible(false);
     vibrate && vibrate.stop();
   },
 });

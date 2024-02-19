@@ -11,6 +11,8 @@ const messageBuilder = new MessageBuilder({
   appId,
 });
 
+hmUI.setStatusBarVisible(false);
+
 App({
   globalData: {
     messageBuilder: messageBuilder,

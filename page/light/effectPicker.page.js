@@ -167,5 +167,7 @@ Page({
         this.drawElements()
     },
     build() { },
-    onDestroy() { }
+    onDestroy() { 
+        hmUI.setStatusBarVisible(false);
+    }
 });

@@ -320,6 +320,7 @@ Page({
   },
 
   onDestroy() {
+    hmUI.setStatusBarVisible(false);
     messageBuilder.off("call", this.onAppMessage);
     logger.debug("page onDestroy invoked");
   },

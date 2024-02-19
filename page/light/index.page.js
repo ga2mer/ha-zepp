@@ -282,7 +282,6 @@ Page({
     },
     onInit(param) {
         logger.log('onInit')
-
         this.state.item = JSON.parse(param)
         this.drawWait()
         this.getEntityInfo()
@@ -290,5 +289,7 @@ Page({
     build() {
         hmUI.setLayerScrolling(false);
     },
-    onDestroy() { }
+    onDestroy() {
+        hmUI.setStatusBarVisible(false);
+    }
 });

@@ -206,7 +206,7 @@ Page({
 
         this.state.y = 60 + 10
 
-        const titleHeight = 40;
+        const titleHeight = 30;
         const valueHeight = 48;
 
         this.createWidget(hmUI.widget.TEXT, {
@@ -367,7 +367,7 @@ Page({
             this.state.volumeBar = createProgressBar(
                 {
                     x: 10,
-                    y: DEVICE_HEIGHT - 130,
+                    y: DEVICE_HEIGHT / 2 + 40,
                     h: 24,
                     w: DEVICE_WIDTH - 20,
                     backColor: 0x262626,
@@ -412,6 +412,11 @@ Page({
         this.drawWait()
         this.getEntityInfo()
     },
-    build() { hmUI.setLayerScrolling(false); },
-    onDestroy() { this.destroyTimers(); }
+    build() { 
+        hmUI.setLayerScrolling(false); 
+    },
+    onDestroy() { 
+        hmUI.setStatusBarVisible(false);
+        this.destroyTimers(); 
+    }
 });
