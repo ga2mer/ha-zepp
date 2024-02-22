@@ -5,6 +5,7 @@ const {
   messageBuilder,
   FS_REF_SENSORS_UPDATE_ALARM_ID,
   FS_REF_SENSORS_UPDATE_STATE,
+  FS_REF_SENSORS_UPDATE_TIMESTAMP,
 } = getApp()._options.globalData;
 
 const logger = DeviceRuntimeCore.HmLogger.getLogger("ha-zepp-main");
@@ -15,6 +16,7 @@ Page({
     dataList: [],
     widgets: [],
     rendered: false,
+    sensorsUpdateState: false,
     y: TOP_BOTTOM_OFFSET,
   },
   build() {
@@ -22,12 +24,12 @@ Page({
     this.drawWait();
 
     if (hmBle.connectStatus() === true) {
-      let lastState = hmFS.SysProGetBool(FS_REF_SENSORS_UPDATE_STATE);
-      lastState == undefined ? lastState = false : lastState = lastState
+      this.state.sensorsUpdateState = hmFS.SysProGetBool(FS_REF_SENSORS_UPDATE_STATE);
+      this.state.sensorsUpdateState = this.state.sensorsUpdateState == undefined ? false : this.state.sensorsUpdateState;
       messageBuilder
         .request({ method: "GET_UPDATE_SENSORS_STATE" })
         .then(({ result }) => {
-          this.toggleSensorUpdates((turnOn = result), (isOn = lastState));
+          this.toggleSensorUpdates((turnOn = result), (isOn = this.state.sensorsUpdateState));
           this.getEntityList();
         });
     } else {
@@ -224,7 +226,8 @@ Page({
         y: this.state.y,
         w: DEVICE_WIDTH,
         h: TOP_BOTTOM_OFFSET,
-        //text: "TEST",
+        text: this.state.sensorsUpdateState ? `Last sync: ${hmFS.SysProGetChars(FS_REF_SENSORS_UPDATE_TIMESTAMP)}` : '',
+        text_size: 12,
         click_func: () => {
           hmApp.gotoPage({ file: "page/sensors_update/index.page" });
         },

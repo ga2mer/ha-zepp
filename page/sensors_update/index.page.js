@@ -1,6 +1,6 @@
 import { DEVICE_HEIGHT, DEVICE_WIDTH } from "../home/index.style";
 const logger = DeviceRuntimeCore.HmLogger.getLogger("ha-zepp-update-sensors");
-const { messageBuilder, appId, FS_REF_SENSORS_UPDATE_ALARM_ID } =
+const { messageBuilder, appId, FS_REF_SENSORS_UPDATE_ALARM_ID, FS_REF_SENSORS_UPDATE_TIMESTAMP } =
   getApp()._options.globalData;
 
 const vibrate = hmSensor.createSensor(hmSensor.id.VIBRATE);
@@ -16,6 +16,10 @@ Page({
     logger.debug("onInit");
     vibrate.stop();
     vibrate.scene = 23;
+
+    const time = hmSensor.createSensor(hmSensor.id.TIME)
+    hmFS.SysProSetChars(FS_REF_SENSORS_UPDATE_TIMESTAMP, 
+      `${time.hour.toString()}:${time.minute.toString()} ${time.month.toString()}/${time.day.toString()}/${time.year.toString()}`)
 
     const existingAlarm = hmFS.SysProGetInt64(FS_REF_SENSORS_UPDATE_ALARM_ID);
     if (param === FS_REF_SENSORS_UPDATE_ALARM_ID) {
