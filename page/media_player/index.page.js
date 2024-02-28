@@ -68,7 +68,18 @@ Page({
         return;
     },
     drawWait() {
-        return this.drawTextMessage(`Loading...\n${this.state.item.title}`);
+        //this.drawTextMessage(`Loading...\n${this.state.item.title}`);
+        return this.createWidget(hmUI.widget.IMG_ANIM, {
+            anim_path: 'loading',
+            anim_prefix: 'loading',
+            anim_ext: 'png',
+            anim_fps: 30,
+            anim_size: 60,
+            repeat_count: 0,
+            anim_status: hmUI.anim_status.START,
+            x: DEVICE_WIDTH / 2 - 150/2,
+            y: DEVICE_HEIGHT / 2 - 150/2,
+          });
     },
     drawError(message) {
         let text = "An error occurred";
@@ -206,7 +217,7 @@ Page({
 
         this.state.y = 60 + 10
 
-        const titleHeight = 40;
+        const titleHeight = 30;
         const valueHeight = 48;
 
         this.createWidget(hmUI.widget.TEXT, {
@@ -256,7 +267,7 @@ Page({
             const powerIconHeight = 48
             const powerIconWidth = 96
             this.state.powerButton = this.createWidget(hmUI.widget.BUTTON, {
-                x: DEVICE_WIDTH - powerIconWidth,
+                x: DEVICE_WIDTH / 4 * 3 - powerIconWidth / 2,
                 y: this.state.y + DEVICE_WIDTH / 4 - powerIconHeight / 2,
                 w: powerIconWidth,
                 h: powerIconHeight,
@@ -296,7 +307,7 @@ Page({
         if (this.state.item.attributes.media_title) {
             this.state.titleText = this.createWidget(hmUI.widget.TEXT, {
                 x: 10,
-                y: this.state.y,
+                y: DEVICE_HEIGHT - seekButtonsHeight - 34 - 34,
                 w: DEVICE_WIDTH - 20,
                 h: 38,
                 text: this.state.item.attributes.media_title,
@@ -311,7 +322,7 @@ Page({
         if (this.state.item.attributes.media_artist) {
             this.state.artistText = this.createWidget(hmUI.widget.TEXT, {
                 x: 10,
-                y: this.state.y,
+                y: DEVICE_HEIGHT - seekButtonsHeight - 34,
                 w: DEVICE_WIDTH - 20,
                 h: 34,
                 text: this.state.item.attributes.media_artist,
@@ -367,7 +378,7 @@ Page({
             this.state.volumeBar = createProgressBar(
                 {
                     x: 10,
-                    y: DEVICE_HEIGHT - 130,
+                    y: DEVICE_HEIGHT / 2 + 40,
                     h: 24,
                     w: DEVICE_WIDTH - 20,
                     backColor: 0x262626,
@@ -412,6 +423,11 @@ Page({
         this.drawWait()
         this.getEntityInfo()
     },
-    build() { hmUI.setLayerScrolling(false); },
-    onDestroy() { this.destroyTimers(); }
+    build() { 
+        hmUI.setLayerScrolling(false); 
+    },
+    onDestroy() { 
+        hmUI.setStatusBarVisible(false);
+        this.destroyTimers(); 
+    }
 });

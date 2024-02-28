@@ -48,7 +48,18 @@ Page({
         return;
     },
     drawWait() {
-        return this.drawTextMessage(`Loading...\n${this.state.item.title}`);
+        //return this.drawTextMessage(`Loading...\n${this.state.item.title}`);
+        return this.createWidget(hmUI.widget.IMG_ANIM, {
+            anim_path: 'loading',
+            anim_prefix: 'loading',
+            anim_ext: 'png',
+            anim_fps: 30,
+            anim_size: 60,
+            repeat_count: 0,
+            anim_status: hmUI.anim_status.START,
+            x: DEVICE_WIDTH / 2 - 150/2,
+            y: DEVICE_HEIGHT / 2 - 150/2,
+          });
     },
     drawError(message) {
         let text = "An error occurred";
@@ -282,7 +293,6 @@ Page({
     },
     onInit(param) {
         logger.log('onInit')
-
         this.state.item = JSON.parse(param)
         this.drawWait()
         this.getEntityInfo()
@@ -290,5 +300,7 @@ Page({
     build() {
         hmUI.setLayerScrolling(false);
     },
-    onDestroy() { }
+    onDestroy() {
+        hmUI.setStatusBarVisible(false);
+    }
 });

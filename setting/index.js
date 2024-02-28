@@ -133,7 +133,8 @@ AppSettingsPage({
       Section(
         { style: {width: '50%'} },
         Toggle({
-          label: "Update sensor data to HA, interval 1 hour (BETA)",
+          label: "Update sensor data to HA, interval 1 hour (BETA)" +
+          "(works best if you turn all notifications OFF, this includes the calendar sync)",
           value: (props.settingsStorage.getItem("updateSensorsBool") === "true"),
           onChange: (value) => {
             props.settingsStorage.setItem("updateSensorsBool", value);
