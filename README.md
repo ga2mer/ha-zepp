@@ -19,14 +19,16 @@ Application that allows you to control Home Assistant
 - Open for suggestions
 
 ### Devices supported
-- Mi Band 7 (You need modified Zepp app (see preparations))
-- Amazfit T-Rex 2 (Official Zepp app is enough)
+- Mi Band 7
+- Amazfit Band 7
+- Amazfit T-Rex 2
 - All other Zepp OS devices, but there is no proper UI for them and you need to add the build configuration yourself
 
 ### Preparations
 #### Mi Band 7 only
-- [Modified Zepp App](https://4pda.to/forum/index.php?showtopic=797981&st=15700#entry122653549) (registration required)
-- You need to connect Mi Band 7 to Modified Zepp App the same way you would with Zepp Life (google auth is not  supported)
+- ~~[Modified Zepp App](https://4pda.to/forum/index.php?showtopic=797981&st=15700#entry122653549) (registration required)~~
+- ~~You need to connect Mi Band 7 to Modified Zepp App the same way you would with Zepp Life (google auth is not  supported)~~
+- You can use the official Zepp App, but have to create a custom QR code. Follow [this guide](https://habr.com/en/articles/699368/) for the URL of the QR code you have to adapt.
 #### General steps
 - Download the official Zepp App
 - You need to enable [Developer Mode](https://docs.zepp.com/docs/1.0/guides/tools/zepp-app/) in Zepp app
