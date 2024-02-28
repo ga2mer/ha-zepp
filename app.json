@@ -50,6 +50,10 @@
       },
       "platforms": [
         {
+          "name": "amazfit-band7-nfc",
+          "deviceSource": 252
+        },
+        {
           "name": "amazfit-band7",
           "deviceSource": 253
         },
@@ -58,8 +62,32 @@
           "deviceSource": 254
         },
         {
-          "name": "mi-band7",
+          "name": "l66",
+          "deviceSource": 260
+        },
+        {
+          "name": "l66w",
+          "deviceSource": 261
+        },
+        {
+          "name": "l66_1",
           "deviceSource": 262
+        },
+        {
+          "name": "l66w_2",
+          "deviceSource": 263
+        },
+        {
+          "name": "l66_3",
+          "deviceSource": 264
+        },
+        {
+          "name": "l66_4",
+          "deviceSource": 265
+        },
+        {
+          "name": "l66_5",
+          "deviceSource": 266
         }
       ],
       "designWidth": 194
